@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ "$1" == "--init" ]; then
+	cp /usr/share/WerIstLuka/mkdpkg/name_version_architecture .
+	echo "change the name of the directory and modify the file name_version_architecture/DEBIAN/control"
+	echo "assume name_version_architecture is \"/\""
+	exit
+fi
+
+pkgname=int
+pkgarch=all
+pkgdefaultversion=1.0
+execpath=/usr/bin
+execnewname=int
+execoldname=int.py
+read -p "Version number: " pkgversion
+
+if [ -d "$pkgname"_"$pkgversion"_"$pkgarch" ]; then
+	echo "removing old build environment"
+	rm -rf "$pkgname"_"$pkgversion"_"$pkgarch"
+fi
+
+cp -r "$pkgname"_"$pkgdefaultversion"_"$pkgarch" "$pkgname"_"$pkgversion"_"$pkgarch"
+cp "$execoldname" "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
+
+chmod +x "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
+
+sed -i -e s/"$pkgdefaultversion"/"$pkgversion"/g "$pkgname"_"$pkgversion"_"$pkgarch"/DEBIAN/control
+
+dpkg-deb --build "$pkgname"_"$pkgversion"_"$pkgarch"
+
+unset pkgname pkgarch pkgdefaultversion pkgversion execpath execnewname execoldname
