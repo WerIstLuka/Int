@@ -20,10 +20,12 @@ if [ -d "$pkgname"_"$pkgversion"_"$pkgarch" ]; then
 	rm -rf "$pkgname"_"$pkgversion"_"$pkgarch"
 fi
 
-cp -r "$pkgname"_"$pkgdefaultversion"_"$pkgarch" "$pkgname"_"$pkgversion"_"$pkgarch"
+mkdir -p "$pkgname"_"$pkgversion"_"$pkgarch"/usr/bin
+cp -r "$pkgname"_"$pkgdefaultversion"_"$pkgarch"/* "$pkgname"_"$pkgversion"_"$pkgarch"
 cp "$execoldname" "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
 
 chmod +x "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
+chmod -w "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
 
 sed -i -e s/"$pkgdefaultversion"/"$pkgversion"/g "$pkgname"_"$pkgversion"_"$pkgarch"/DEBIAN/control
 
