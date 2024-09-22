@@ -70,6 +70,9 @@ def CheckOptions(Arguments):
 				pass
 	if "-h" in Arguments:
 		Help()
+	if "--version" in Arguments:
+		print("int 1.2")
+		quit()
 	return(InputBase, OutputBase, OutputArgument)
 
 def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument):
