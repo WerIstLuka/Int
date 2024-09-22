@@ -1,12 +1,5 @@
 #!/bin/bash
 
-if [ "$1" == "--init" ]; then
-	cp /usr/share/WerIstLuka/mkdpkg/name_version_architecture .
-	echo "change the name of the directory and modify the file name_version_architecture/DEBIAN/control"
-	echo "assume name_version_architecture is \"/\""
-	exit
-fi
-
 pkgname=int
 pkgarch=all
 pkgdefaultversion=1.0
