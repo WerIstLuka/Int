@@ -1,0 +1,9 @@
+Package: int
+Version: 1.2
+Architecture: all
+Section: utils
+Essential: no
+Priority: optional
+Depends: python3 (>=3.10)
+Maintainer: WerIstLuka
+Description: Convert numbers from any base to any other base
