@@ -4,6 +4,8 @@
 
 import sys
 import numpy
+
+Version = 1.3
 def Help():
 	print("""\
 Convert any base to any other
@@ -26,20 +28,24 @@ def CheckOptions(Arguments):
 	InputBase = 10
 	OutputBase = 10
 	OutputArgument = ""
+	InputArgument = ""
 	for i in range(len(Arguments)):
 		match Arguments[i][:2]:
 			case "-b":
 				if InputBase != 10:
 					Exit_Too_Many_Prefixes()
 				InputBase = 2
+				InputArgument = "-b"
 			case "-x":
 				if InputBase != 10:
 					Exit_Too_Many_Prefixes()
 				InputBase = 16
+				InputArgument = "-x"
 			case "-o":
 				if InputBase != 10:
 					Exit_Too_Many_Prefixes()
 				InputBase = 8
+				InputArgument = "-o"
 			case "-B":
 				if InputBase != 10:
 					Exit_Too_Many_Prefixes()
@@ -47,6 +53,7 @@ def CheckOptions(Arguments):
 					print(f"No Base given: {Arguments[i]}")
 					quit()
 				InputBase = int(Arguments[i][2:])
+				InputArgument = Arguments[i]
 			case "-O":
 				if OutputBase != 10:
 					print("Output Base given twice")
@@ -71,15 +78,16 @@ def CheckOptions(Arguments):
 	if "-h" in Arguments:
 		Help()
 	if "--version" in Arguments:
-		print("int 1.2")
+		print(f"int {Version}")
 		quit()
-	return(InputBase, OutputBase, OutputArgument)
+	return(InputBase, OutputBase, OutputArgument, InputArgument)
 
-def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument):
+def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument, InputArgument):
 	if OutputBase != 10:
 		Arguments.remove(OutputArgument)
 	DecimalIntegers = []
 	if InputBase != 10:
+		Arguments.remove(InputArgument)
 		for i in range(len(Arguments)):
 			try:
 				int(Arguments[i], InputBase)
@@ -111,5 +119,5 @@ Arguments = sys.argv[1:]
 if len(Arguments) == 0:
 	Help()
 Options = CheckOptions(Arguments)
-DecimalOutput =  GetIntegers(Arguments, Options[0], Options[1], Options[2])
+DecimalOutput =  GetIntegers(Arguments, Options[0], Options[1], Options[2], Options[3])
 OutputIntegers(DecimalOutput, Options[1])
