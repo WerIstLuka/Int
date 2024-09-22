@@ -25,6 +25,7 @@ def Exit_Too_Many_Prefixes():
 def CheckOptions(Arguments):
 	InputBase = 10
 	OutputBase = 10
+	OutputArgument = ""
 	for i in range(len(Arguments)):
 		match Arguments[i][:2]:
 			case "-b":
@@ -50,16 +51,30 @@ def CheckOptions(Arguments):
 				if OutputBase != 10:
 					print("Output Base given twice")
 					quit()
-				OutputBase = int(Arguments[i][2:])
+				match Arguments[i][2:]:
+					case "x":
+						OutputBase = 16
+					case "b":
+						OutputBase = 2
+					case "o":
+						OutputBase = 8
+					case _:
+						try:
+							int(Arguments[i][2:])
+						except Exception:
+							print(f"Not a valid base: {Arguments[i]}")
+							quit()
+						OutputBase = int(Arguments[i][2:])
+				OutputArgument = Arguments[i]
 			case _:
 				pass
 	if "-h" in Arguments:
 		Help()
-	return(InputBase, OutputBase)
+	return(InputBase, OutputBase, OutputArgument)
 
-def GetIntegers(Arguments, InputBase, OutputBase):
+def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument):
 	if OutputBase != 10:
-		Arguments.remove(f"-O{OutputBase}")
+		Arguments.remove(OutputArgument)
 	DecimalIntegers = []
 	if InputBase != 10:
 		for i in range(len(Arguments)):
@@ -93,5 +108,5 @@ Arguments = sys.argv[1:]
 if len(Arguments) == 0:
 	Help()
 Options = CheckOptions(Arguments)
-DecimalOutput =  GetIntegers(Arguments, Options[0], Options[1])
+DecimalOutput =  GetIntegers(Arguments, Options[0], Options[1], Options[2])
 OutputIntegers(DecimalOutput, Options[1])
