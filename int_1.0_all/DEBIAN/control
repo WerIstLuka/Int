@@ -4,6 +4,6 @@ Architecture: all
 Section: utils
 Essential: no
 Priority: optional
-Depends: python3 (>=3.10)
+Depends: python3 (>=3.10), python3-numpy
 Maintainer: WerIstLuka
 Description: Convert numbers from any base to any other base

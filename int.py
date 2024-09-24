@@ -5,7 +5,7 @@
 import sys
 import numpy
 
-Version = 1.3
+Version = 1.4
 def Help():
 	print("""\
 Convert any base to any other
