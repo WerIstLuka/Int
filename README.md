@@ -1,4 +1,4 @@
-version = 1.3
+version = 1.4
 # installation
 ## debian or debian based
 download the .deb file
