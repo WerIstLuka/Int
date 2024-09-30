@@ -5,7 +5,8 @@
 import sys
 import numpy
 
-Version = 1.4
+Version = 1.5
+
 def Help():
 	print("""\
 Convert any base to any other
@@ -24,6 +25,7 @@ options:
 def Exit_Too_Many_Prefixes():
 	print("Conflicting Prefixes")
 	quit()
+
 def CheckOptions(Arguments):
 	InputBase = 10
 	OutputBase = 10
@@ -115,9 +117,18 @@ def OutputIntegers(DecimalIntegers, OutputBase):
 	for i in range(len(DecimalIntegers)):
 		print(numpy.base_repr(DecimalIntegers[i], int(OutputBase)))
 
-Arguments = sys.argv[1:]
+# get pipes before arguments (read left to right)
+Arguments = []
+if not sys.stdin.isatty():
+	for line in sys.stdin:
+		line = line.rstrip()
+		Arguments = line.split(" ")
+for i in range(len(sys.argv[1:])):
+	Arguments.append(sys.argv[1:][i])
+
 if len(Arguments) == 0:
 	Help()
+
 Options = CheckOptions(Arguments)
 DecimalOutput =  GetIntegers(Arguments, Options[0], Options[1], Options[2], Options[3])
 OutputIntegers(DecimalOutput, Options[1])
