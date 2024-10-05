@@ -5,7 +5,7 @@
 import sys
 import numpy
 
-Version = 1.5
+Version = "1.5.1"
 
 def Help():
 	print("""\
@@ -122,7 +122,7 @@ Arguments = []
 if not sys.stdin.isatty():
 	for line in sys.stdin:
 		line = line.rstrip()
-		Arguments = line.split(" ")
+		Arguments += line.split(" ")
 for i in range(len(sys.argv[1:])):
 	Arguments.append(sys.argv[1:][i])
 
