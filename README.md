@@ -1,4 +1,8 @@
 version: 1.5.3
+
+here is a yt video showing what int can do
+https://www.youtube.com/watch?v=buzgkrU23eY
+
 # installation
 ## debian or debian based
 download the .deb file
