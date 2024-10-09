@@ -14,5 +14,5 @@ clone the repo ```git clone https://github.com/WerIstLuka/int```
 
 change directory to int ```cd int```
 
-use the mkdpkg script to build ```mkdpkg```
+use the mkdpkg script to build ```bash mkdpkg```
 

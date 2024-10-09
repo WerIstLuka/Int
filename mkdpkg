@@ -1,27 +1,24 @@
 #!/bin/bash
 
-pkgname=int
-pkgarch=all
-pkgdefaultversion=1.0
-execpath=/usr/bin
-execnewname=int
-execoldname=int.py
 pkgversion=$(cat int.py | grep "^Version" | grep -Po '((?:[0-9]\.)+[0-9])|(?<=\")\d(?=\")')
 
-if [ -d "$pkgname"_"$pkgversion"_"$pkgarch" ]; then
+if [ -f "int_${pkgversion}_all.deb" ]; then
 	echo "removing old build environment"
-	rm -rf "$pkgname"_"$pkgversion"_"$pkgarch"
+	rm -rf "int_${pkgversion}_all"
 fi
 
-mkdir -p "$pkgname"_"$pkgversion"_"$pkgarch"/usr/bin
-cp -r "$pkgname"_"$pkgdefaultversion"_"$pkgarch"/* "$pkgname"_"$pkgversion"_"$pkgarch"
-cp "$execoldname" "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
+mkdir -p "int_${pkgversion}_all/DEBIAN"
+mkdir -p "int_${pkgversion}_all/usr/bin"
+cp control "int_${pkgversion}_all/DEBIAN"
+cp int.py "int_${pkgversion}_all/usr/bin"
+pushd "int_${pkgversion}_all/usr/bin" > /dev/null
+chmod -w int.py
+chmod +x int.py
+mv int.py int
+popd > /dev/null
 
-chmod +x "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
-chmod -w "$pkgname"_"$pkgversion"_"$pkgarch""$execpath"/"$execnewname"
+sed -i -e "s/1.0/${pkgversion}/g" "int_${pkgversion}_all/DEBIAN/control"
 
-sed -i -e s/"$pkgdefaultversion"/"$pkgversion"/g "$pkgname"_"$pkgversion"_"$pkgarch"/DEBIAN/control
+dpkg-deb --build "int_${pkgversion}_all"
 
-dpkg-deb --build "$pkgname"_"$pkgversion"_"$pkgarch"
-
-unset pkgname pkgarch pkgdefaultversion pkgversion execpath execnewname execoldname
+rm -rf "int_${pkgversion}_all"
