@@ -3,7 +3,7 @@
 pkgversion=$(cat int.py | grep "^Version" | grep -Po '((?:[0-9]\.)+[0-9])|(?<=\")\d(?=\")')
 
 if [ -f "int_${pkgversion}_all.deb" ]; then
-	echo "removing old build environment"
+	echo "removing old build"
 	rm -rf "int_${pkgversion}_all"
 fi
 
