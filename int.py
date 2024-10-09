@@ -5,7 +5,7 @@
 import sys
 import numpy
 
-Version = "1.5.1"
+Version = "1.5.2"
 
 def Help():
 	print("""\

@@ -6,7 +6,7 @@ pkgdefaultversion=1.0
 execpath=/usr/bin
 execnewname=int
 execoldname=int.py
-read -p "Version number: " pkgversion
+pkgversion=$(cat int.py | grep "^Version" | grep -Po '((?:[0-9]\.)+[0-9])|(?<=\")\d(?=\")')
 
 if [ -d "$pkgname"_"$pkgversion"_"$pkgarch" ]; then
 	echo "removing old build environment"

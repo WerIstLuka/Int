@@ -1,4 +1,4 @@
-version: 1.5.1
+version: 1.5.2
 # installation
 ## debian or debian based
 download the .deb file
@@ -15,6 +15,4 @@ clone the repo ```git clone https://github.com/WerIstLuka/int```
 change directory to int ```cd int```
 
 use the mkdpkg script to build ```mkdpkg```
-
-enter the version number at the top of this page
 
