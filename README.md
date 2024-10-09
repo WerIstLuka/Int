@@ -1,6 +1,7 @@
 version: 1.5.3
+## YouTube video
 
-[![video](https://img.youtube.com/vi/buzgkrU23eY/0.jpg)](https://www.youtube.com/watch?v=buzgkrU23eY)
+[![video](http://img.youtube.com/vi/buzgkrU23eY/0.jpg)](http://www.youtube.com/watch?v=buzgkrU23eY "click to watch the video")
 
 # installation
 ## debian or debian based
