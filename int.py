@@ -5,7 +5,7 @@
 import sys
 import numpy
 
-Version = "1.5.2"
+Version = "1.5.3"
 
 def Help():
 	print("""\
@@ -77,7 +77,7 @@ def CheckOptions(Arguments):
 				OutputArgument = Arguments[i]
 			case _:
 				pass
-	if "-h" in Arguments:
+	if "-h" in Arguments or "--help" in Arguments:
 		Help()
 	if "--version" in Arguments:
 		print(f"int {Version}")
