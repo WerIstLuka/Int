@@ -1,6 +1,6 @@
 version: 1.5.3
 
-[![video](https://img.youtube.com/vi/buzgkrU23eY/0.jpg)(https://www.youtube.com/watch?v=buzgkrU23eY)
+[![video](https://img.youtube.com/vi/buzgkrU23eY/0.jpg)](https://www.youtube.com/watch?v=buzgkrU23eY)
 
 # installation
 ## debian or debian based
