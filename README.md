@@ -13,8 +13,6 @@ the go version will be the only version going forward
 
 im planning to release go at version 2.0
 
-1.x is only python
-2.x will only be go
 
 version: 1.5.3
 
