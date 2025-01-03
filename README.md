@@ -1,3 +1,14 @@
+# IMPORANT
+this is currently work in progress
+i decided to rewrite this in Go because python is slow
+the python branch will be discontinued after the go version has feature parity
+
+the go version will be the only version going forward
+im planning to release go at version 2.0
+
+1.x is only python
+2.x will only be go
+
 version: 1.5.3
 
 https://github.com/user-attachments/assets/219743bf-ece8-4439-bd79-cb15a3b970cc
