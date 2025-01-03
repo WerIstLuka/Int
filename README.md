@@ -3,6 +3,9 @@ this is currently work in progress
 i decided to rewrite this in Go because python is slow
 the python branch will be discontinued after the go version has feature parity
 
+as of now the build script doesnt work
+it will be fixed once the go version of int works good enough for testing
+
 the go version will be the only version going forward
 im planning to release go at version 2.0
 
