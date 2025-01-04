@@ -4,6 +4,8 @@ import (
 	"os"
 	"io"
 	"strings"
+	"slices"
+	"regexp"
 )
 
 func HasPipeInput()bool{
@@ -37,6 +39,46 @@ func GetArguments() ([]string, []string){
 	}
 	return Options, Numbers
 }
+
+func GetInt(char string)int{
+	switch char{
+		case "b":
+			return 2
+		case "o":
+			return 8
+		case "x":
+			return 16
+		default:
+			return 0
+	}
+	return 0
+}
+
+
+func Parser()(int, int){
+	Options, Numbers := GetArguments()
+	var digitCheck = regexp.MustCompile(`^[0-9]+$`)
+	InputBase := 0
+	OutputBase := 0
+	for i:=0; i<len(Options); i++{
+		Option := Options[i]
+		if len(Option) < 2{
+			println("Error: invalid option \"", Option, "\"")
+		}
+		if InputBase != 0 && slices.Contains([]string{"-B", "-b", "-o", "-x"}, Option){
+			println("Error: Input base was given twice")
+			os.Exit(1)
+		}
+		if Option[1:2] == "B" && digitCheck.MatchString(Option[2:len(Option)-1]){
+			InputBase := int(Option[2:len(Option)-1])
+		}
+		if len(Option) == 2{
+			GetInt(Option[1:2])
+		}
+	}
+	return InputBase, OutputBase
+}
+
 
 func main() {
 	GetArguments()
