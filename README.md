@@ -1,7 +1,15 @@
-version: 1.5.3
+# info
+I decided to rewrite this program in go
+
+There is a go branch but its not finished
+
+the python version will be discontinued when the go version has feature parity
+
+go will be released as version 2.0
 
 https://github.com/user-attachments/assets/219743bf-ece8-4439-bd79-cb15a3b970cc
 
+version: 1.5.3
 # installation
 ## debian or debian based
 download the .deb file
