@@ -134,7 +134,7 @@ def OutputIntegers(DecimalIntegers, OutputBase):
 
 # get pipes before arguments (read left to right)
 Arguments = []
-Debugger = True
+Debugger = False
 if not Debugger: #debugger hangs when trying to read from stdin
 	if not sys.stdin.isatty():
 		for line in sys.stdin:
