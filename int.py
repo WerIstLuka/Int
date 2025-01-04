@@ -5,7 +5,7 @@
 import sys
 import numpy
 
-Version = "1.5.3"
+Version = "1.5.4"
 
 def Help():
 	print("""\
@@ -25,6 +25,22 @@ options:
 def Exit_Too_Many_Prefixes():
 	print("Conflicting Prefixes")
 	quit()
+
+def GetInt(Arguments, i):
+	match Arguments[i][2:]:
+		case "x":
+			OutputBase = 16
+		case "b":
+			OutputBase = 2
+		case "o":
+			OutputBase = 8
+		case _:
+			try:
+				OutputBase = int(Arguments[i][2:])
+			except Exception:
+				print(f"Not a valid base: {Arguments[i]}")
+				quit()
+	return OutputBase
 
 def CheckOptions(Arguments):
 	InputBase = 10
@@ -54,26 +70,16 @@ def CheckOptions(Arguments):
 				if Arguments[i][2:] == "":
 					print(f"No Base given: {Arguments[i]}")
 					quit()
-				InputBase = int(Arguments[i][2:])
+				InputBase = GetInt(Arguments, i)
 				InputArgument = Arguments[i]
 			case "-O":
 				if OutputBase != 10:
 					print("Output Base given twice")
 					quit()
-				match Arguments[i][2:]:
-					case "x":
-						OutputBase = 16
-					case "b":
-						OutputBase = 2
-					case "o":
-						OutputBase = 8
-					case _:
-						try:
-							int(Arguments[i][2:])
-						except Exception:
-							print(f"Not a valid base: {Arguments[i]}")
-							quit()
-						OutputBase = int(Arguments[i][2:])
+				if Arguments[i][2:] == "":
+					print(f"No Base given: {Arguments[i]}")
+					quit()
+				OutputBase = GetInt(Arguments, i)
 				OutputArgument = Arguments[i]
 			case _:
 				pass
@@ -91,6 +97,9 @@ def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument, InputArgument)
 	if InputBase != 10:
 		Arguments.remove(InputArgument)
 		for i in range(len(Arguments)):
+			if Arguments[i][0] == "-":
+				print(f"unknown option: {Arguments[i]}")
+				quit()
 			try:
 				int(Arguments[i], InputBase)
 			except Exception:
@@ -99,6 +108,9 @@ def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument, InputArgument)
 			DecimalIntegers.append(int(Arguments[i], InputBase))
 	else:
 		for i in range(len(Arguments)):
+			if Arguments[i][0] == "-":
+				print(f"unknown option: {Arguments[i]}")
+				quit()
 			match Arguments[i][:2]:
 				case "0b":
 					DecimalIntegers.append(int(Arguments[i][2:], 2))
@@ -111,6 +123,9 @@ def GetIntegers(Arguments, InputBase, OutputBase, OutputArgument, InputArgument)
 						print(f"Operation not possible: {Arguments[i]}")
 						quit()
 					DecimalIntegers.append(int(Arguments[i]))
+	if len(Arguments) == 0:
+		print("no input given")
+		quit()
 	return DecimalIntegers
 
 def OutputIntegers(DecimalIntegers, OutputBase):
@@ -119,10 +134,12 @@ def OutputIntegers(DecimalIntegers, OutputBase):
 
 # get pipes before arguments (read left to right)
 Arguments = []
-if not sys.stdin.isatty():
-	for line in sys.stdin:
-		line = line.rstrip()
-		Arguments += line.split(" ")
+Debugger = True
+if not Debugger: #debugger hangs when trying to read from stdin
+	if not sys.stdin.isatty():
+		for line in sys.stdin:
+			line = line.rstrip()
+			Arguments += line.split(" ")
 for i in range(len(sys.argv[1:])):
 	Arguments.append(sys.argv[1:][i])
 
