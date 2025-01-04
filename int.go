@@ -6,6 +6,7 @@ import (
 	"strings"
 	"slices"
 	"regexp"
+	"strconv"
 )
 
 func HasPipeInput()bool{
@@ -40,7 +41,7 @@ func GetArguments() ([]string, []string){
 	return Options, Numbers
 }
 
-func GetInt(char string)int{
+func GetInt(char string)uint64{
 	switch char{
 		case "b":
 			return 2
@@ -55,11 +56,11 @@ func GetInt(char string)int{
 }
 
 
-func Parser()(int, int){
-	Options, Numbers := GetArguments()
-	var digitCheck = regexp.MustCompile(`^[0-9]+$`)
-	InputBase := 0
-	OutputBase := 0
+func Parser(Options []string)(uint64, uint64){
+	digitCheck := regexp.MustCompile(`^[0-9]+$`)
+	var GotInputBase bool = false
+	var InputBase uint64 = 0
+	var OutputBase uint64 = 0
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
@@ -70,16 +71,23 @@ func Parser()(int, int){
 			os.Exit(1)
 		}
 		if Option[1:2] == "B" && digitCheck.MatchString(Option[2:len(Option)-1]){
-			InputBase := int(Option[2:len(Option)-1])
+			InputBase, _ = strconv.ParseUint(Option[2:len(Option)-1], 10, 64)
+			GotInputBase = true
 		}
-		if len(Option) == 2{
-			GetInt(Option[1:2])
+		if len(Option) == 2 && slices.Contains([]string{"b", "o", "x"}, Option[1:2]){
+			InputBase = GetInt(Option[1:2])
 		}
+		if GotInputBase && InputBase == 0{
+			println("Error: input base can't be 0")
+		}
+	println(InputBase)
+	println(OutputBase)
 	}
 	return InputBase, OutputBase
 }
 
 
 func main() {
-	GetArguments()
+	Options, _ := GetArguments()
+	Parser(Options)
 }
