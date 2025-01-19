@@ -139,23 +139,37 @@ func Parser(Options []string)(uint64, uint64){
 
 func ConvertNumbers(Numbers []string, InputBase uint64) {
 	ConvertedNumbers := []uint64{}
-	for i:=0; i<len(Numbers); i++{
-		NumberStr := Numbers[i]
-		println(NumberStr)
-		if len(NumberStr) >= 2{
-			switch NumberStr[0:2]{
-				case "0b":
+	if InputBase == 0{
+		for i:=0; i<len(Numbers); i++{
+			NumberStr := Numbers[i]
+			println("num str:", NumberStr)
+			if len(NumberStr) >= 2{
+				if NumberStr[0:2] == "0b"{
 					InputBase = 2
+					NumberStr = NumberStr[2:len(NumberStr)]
+				} else if NumberStr[0:2] == "0x"{
+					InputBase = 16
+					NumberStr = NumberStr[2:len(NumberStr)]
+				}
+			} else {
+				InputBase = 10
 			}
+			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
+			if err != nil{
+				println("Operation not possible:", NumberStr)
+				os.Exit(1)
+			}
+			println("num int:", NumberInt)
+			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
-		NumberInt, err := strconv.ParseUint(NumberStr, 10, 64)
-		println(err)
-		if err == nil{
-			println("Operation not possible:", NumberStr)
-			os.Exit(1)
+	} else {
+		for i:=0; i<len(Numbers); i++{
+		NumberStr := Numbers[i]
+		println("num str:", NumberStr)
 		}
-		println(NumberInt)
-		ConvertedNumbers = append(ConvertedNumbers, NumberInt)
+	}
+	for i:=0; i<len(ConvertedNumbers); i++{
+		println(ConvertedNumbers[i])
 	}
 }
 
