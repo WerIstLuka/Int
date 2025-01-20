@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"io"
 	"strings"
@@ -37,12 +38,12 @@ func GetArguments() ([]string, []string){
 	if HasPipeInput(){
  		bytes, _ := io.ReadAll(os.Stdin)
 		pipe := strings.Split((string(bytes)), " ")
-		println(pipe)
+		fmt.Println(pipe)
 		for i:=0; i<len(pipe); i++{
 			if pipe[i][0:1] == "-"{
-				Options = append(Options, pipe[i])
+				Options = append(Options, strings.TrimSpace(pipe[i]))
 			}else{
-				Numbers = append(Numbers, pipe[i])
+				Numbers = append(Numbers, strings.TrimSpace(pipe[i]))
 			}
 		}
 	}
@@ -93,7 +94,7 @@ func Parser(Options []string)(uint64, uint64){
 	var OutputBase uint64 = 0
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
-		println(Option)
+		fmt.Println(Option)
 		if len(Option) < 2{
 			println("Error: invalid option:", Option)
 			os.Exit(1)
@@ -132,17 +133,22 @@ func Parser(Options []string)(uint64, uint64){
 			GotOutputBase = true
 		}
 	}
-	println("In:", InputBase)
-	println("Out:", OutputBase)
+	fmt.Println("In:", InputBase)
+	fmt.Println("Out:", OutputBase)
 	return InputBase, OutputBase
 }
 
-func ConvertNumbers(Numbers []string, InputBase uint64) {
+func ErrorOperationNotPossible(Operation string){
+	println("Error: Operation not possible:", Operation)
+	os.Exit(1)
+}
+
+func ConvertNumbers(Numbers []string, InputBase uint64) []uint64 {
 	ConvertedNumbers := []uint64{}
 	if InputBase == 0{
 		for i:=0; i<len(Numbers); i++{
 			NumberStr := Numbers[i]
-			println("num str:", NumberStr)
+			fmt.Println("num str:", NumberStr)
 			if len(NumberStr) >= 2{
 				if NumberStr[0:2] == "0b"{
 					InputBase = 2
@@ -156,29 +162,46 @@ func ConvertNumbers(Numbers []string, InputBase uint64) {
 			}
 			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
 			if err != nil{
-				println("Operation not possible:", NumberStr)
-				os.Exit(1)
+				ErrorOperationNotPossible(NumberStr)
 			}
-			println("num int:", NumberInt)
+			fmt.Println("num int:", NumberInt)
 			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
 	} else {
 		for i:=0; i<len(Numbers); i++{
-		NumberStr := Numbers[i]
-		println("num str:", NumberStr)
+			NumberStr := Numbers[i]
+			fmt.Println("num str:", NumberStr)
+			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
+			if err != nil{
+				ErrorOperationNotPossible(NumberStr)
+			}
+			fmt.Println("num int:", NumberInt)
+			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
 	}
 	for i:=0; i<len(ConvertedNumbers); i++{
-		println(ConvertedNumbers[i])
+		fmt.Println(ConvertedNumbers[i])
+	}
+	return ConvertedNumbers
+}
+
+func OutputNumbers(Numbers []uint64, OutputBase int){
+	if OutputBase == 0{
+		OutputBase = 10
+	}
+	for i:=0; i<len(Numbers); i++{
+		fmt.Println(strconv.FormatInt(int64(Numbers[i]), OutputBase))
 	}
 }
 
+
 func main() {
 	Options, Numbers := GetArguments()
-	InputBase, _ := Parser(Options)
+	InputBase, OutputBase := Parser(Options)
 	if len(Numbers) == 0{
-		println("no input")
+		fmt.Println("no input")
 		os.Exit(0)
 	}
-	ConvertNumbers(Numbers, InputBase)
+	ConvertedNumbers := ConvertNumbers(Numbers, InputBase)
+	OutputNumbers(ConvertedNumbers, int(OutputBase))
 }
