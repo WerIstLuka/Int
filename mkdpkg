@@ -1,24 +1,170 @@
 #!/bin/bash
 
-pkgversion=$(cat int.py | grep "^Version" | grep -Po '((?:[0-9]\.)+[0-9])|(?<=\")\d(?=\")')
+pkgversion=$(cat int.go | grep "^var Version string" | grep -Po '(?<=").+(?=")')
 
-if [ -f "int_${pkgversion}_all.deb" ]; then
-	echo "removing old build"
-	rm -rf "int_${pkgversion}_all"
+echo "building version" $pkgversion
+
+if [ -d "build" ]; then
+	echo "removing old build dir"
+	rm -rf "build"
 fi
 
-mkdir -p "int_${pkgversion}_all/DEBIAN"
-mkdir -p "int_${pkgversion}_all/usr/bin"
-cp control "int_${pkgversion}_all/DEBIAN"
-cp int.py "int_${pkgversion}_all/usr/bin"
-pushd "int_${pkgversion}_all/usr/bin" > /dev/null
-chmod -w int.py
-chmod +x int.py
-mv int.py int
-popd > /dev/null
+mkdir "build"
 
-sed -i -e "s/1.0/${pkgversion}/g" "int_${pkgversion}_all/DEBIAN/control"
+echo "building for linux amd64"
+env GOOS=linux GOARCH=amd64 go build -o build/linux-amd64
+echo "building for linux arm64"
+env GOOS=linux GOARCH=arm64 go build -o build/linux-arm64
+echo "building for linux riscv64"
+env GOOS=linux GOARCH=riscv64 go build -o build/linux-riscv64
+echo "building for freebsd amd64"
+env GOOS=freebsd GOARCH=amd64 go build -o build/freebsd-amd64
+echo "building for freebsd arm64"
+env GOOS=freebsd GOARCH=arm64 go build -o build/freebsd-arm64
+echo "building for openbsd amd64"
+env GOOS=openbsd GOARCH=amd64 go build -o build/openbsd-amd64
+echo "building for openbsd arm64"
+env GOOS=openbsd GOARCH=arm64 go build -o build/openbsd-arm64
+echo "building for windows amd64"
+env GOOS=windows GOARCH=amd64 go build -o build/windows-amd64.exe
+echo "building for windows arm64"
+env GOOS=windows GOARCH=arm64 go build -o build/windows-arm64.exe
+echo "building for darwin amd64"
+env GOOS=darwin GOARCH=amd64 go build -o build/darwin-amd64
+echo "building for darwin arm64"
+env GOOS=darwin GOARCH=arm64 go build -o build/darwin-arm64
 
-dpkg-deb --build "int_${pkgversion}_all"
+pushd build >> /dev/null
 
-rm -rf "int_${pkgversion}_all"
+
+if [ $(arch) == "x86_64" ]; then
+	testarch=amd64
+fi
+if [ $(arch) == "aarch64" ]; then
+	testarch=arm64
+fi
+
+if [ "$testarch" == "" ]; then
+	echo "unknown architecture"
+	echo "skipping tests"
+else	
+	echo "----------testing----------"
+	if [ $(./linux-${testarch} -v) == "${pkgversion}" ];  then
+		echo "passed"
+	else
+		echo "input: -v"
+		echo "expected output: ${pkgversion}"
+		echo "actual output: $(./linux-${testarch} -v)"
+	fi
+
+	if [ $(./linux-${testarch} 0b101) == "5" ];  then
+		echo "passed"
+	else
+		echo "input: 0b101"
+		echo "expected output: 5"
+		echo "actual output: $(./linux-${testarch} 0b101)"
+	fi
+
+	if [ $(./linux-${testarch} 0x20) == "32" ];  then
+		echo "passed"
+	else
+		echo "input: 0x20"
+		echo "expected output: 32"
+		echo "actual output: $(./linux-${testarch} 0x20)"
+	fi
+
+	if [ $(./linux-${testarch} a -x) == "10" ];  then
+		echo "passed"
+	else
+		echo "input: a -x"
+		echo "expected output: 10"
+		echo "actual output: $(./linux-${testarch} a -x)"
+	fi
+	if [ "$(./linux-${testarch} 2 -b)" == "Error: Operation not possible: 2" ];  then
+		echo "passed"
+	else
+		echo "input: 2 -b"
+		echo "expected output: Error: Operation not possible: 2"
+		echo "actual output: $(./linux-${testarch} 2 -b)"
+	fi
+	if [ $(./linux-${testarch} 10 -B7) == "7" ];  then
+		echo "passed"
+	else
+		echo "input: 10 -B7"
+		echo "expected output: 7"
+		echo "actual output: $(./linux-${testarch} 10 -B7)"
+	fi
+	if [ $(./linux-${testarch} 10 -Ob) == "1010" ];  then
+		echo "passed"
+	else
+		echo "input: 10 -Ob"
+		echo "expected output: 1010"
+		echo "actual output: $(./linux-${testarch} 10 -Ob)"
+	fi
+	if [ "$(echo 0b101 | ./linux-${testarch})" == "5" ];  then
+		echo "passed"
+	else
+		echo "input: from pipe: 0b101"
+		echo "expected output: 5"
+		echo "actual output: $(echo 0b101 | ./linux-${testarch})"
+	fi
+	if [ "$(echo -x 10 | ./linux-${testarch})" == "16" ];  then
+		echo "passed"
+	else
+		echo "input: from pipe: -x 10"
+		echo "expected output: 16"
+		echo "actual output: $(echo -x 10 | ./linux-${testarch})"
+	fi
+	if [ "$(echo -x -Ob | ./linux-${testarch} 20)" == "100000" ];  then
+		echo "passed"
+	else
+		echo "input: -x -Ob | 20"
+		echo "expected output: 100000"
+		echo "actual output: $(echo -x -Ob | ./linux-${testarch} 20)"
+	fi
+	if [ $(./linux-${testarch} -O7 10) == "13" ];  then
+		echo "passed"
+	else
+		echo "input: -O7 10"
+		echo "expected output: 13"
+		echo "actual output: $(./linux-${testarch} -O7 10)"
+	fi
+fi
+
+
+echo "building debian packages"
+arch=amd64
+mkdir -p int_${pkgversion}_${arch}/{DEBIAN,usr/bin}
+cp ../control "int_${pkgversion}_${arch}/DEBIAN"
+sed -i -e "s/pkgver/${pkgversion}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+sed -i -e "s/pkgarch/${arch}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+cp linux-${arch} "int_${pkgversion}_${arch}/usr/bin/int"
+chmod -w "int_${pkgversion}_${arch}/usr/bin/int"
+chmod +x "int_${pkgversion}_${arch}/usr/bin/int"
+dpkg-deb --build "int_${pkgversion}_${arch}"
+rm -rf "int_${pkgversion}_${arch}"
+
+arch=arm64
+mkdir -p int_${pkgversion}_${arch}/{DEBIAN,usr/bin}
+cp ../control "int_${pkgversion}_${arch}/DEBIAN"
+sed -i -e "s/pkgver/${pkgversion}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+sed -i -e "s/pkgarch/${arch}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+cp linux-${arch} "int_${pkgversion}_${arch}/usr/bin/int"
+chmod -w "int_${pkgversion}_${arch}/usr/bin/int"
+chmod +x "int_${pkgversion}_${arch}/usr/bin/int"
+dpkg-deb --build "int_${pkgversion}_${arch}"
+rm -rf "int_${pkgversion}_${arch}"
+
+arch=riscv64
+mkdir -p int_${pkgversion}_${arch}/{DEBIAN,usr/bin}
+cp ../control "int_${pkgversion}_${arch}/DEBIAN"
+sed -i -e "s/pkgver/${pkgversion}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+sed -i -e "s/pkgarch/${arch}/g" "int_${pkgversion}_${arch}/DEBIAN/control"
+cp linux-${arch} "int_${pkgversion}_${arch}/usr/bin/int"
+chmod -w "int_${pkgversion}_${arch}/usr/bin/int"
+chmod +x "int_${pkgversion}_${arch}/usr/bin/int"
+dpkg-deb --build "int_${pkgversion}_${arch}"
+rm -rf "int_${pkgversion}_${arch}"
+
+unset arch
+popd >> /dev/null
