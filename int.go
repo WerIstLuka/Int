@@ -38,7 +38,6 @@ func GetArguments() ([]string, []string){
 	if HasPipeInput(){
  		bytes, _ := io.ReadAll(os.Stdin)
 		pipe := strings.Split((string(bytes)), " ")
-		fmt.Println(pipe)
 		for i:=0; i<len(pipe); i++{
 			if pipe[i][0:1] == "-"{
 				Options = append(Options, strings.TrimSpace(pipe[i]))
@@ -94,25 +93,19 @@ func Parser(Options []string)(uint64, uint64){
 	var OutputBase uint64 = 0
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
-		fmt.Println(Option)
 		if len(Option) < 2{
 			println("Error: invalid option:", Option)
 			os.Exit(1)
 		}
-		if InputBase != 0 && slices.Contains([]string{"-B", "-b", "-o", "-x"}, Option){
+		if GotInputBase && slices.Contains([]string{"-B", "-b", "-o", "-x"}, Option[0:2]){
 			println("Error: Input base was given twice")
 			os.Exit(1)
-		} else if OutputBase != 0 && Option[2:len(Option)] == "O"{
+		} else if GotOutputBase && Option[1:2] == "O"{
 			println("Error: Output base was given twice")
 			os.Exit(1)
 		} else if len(Option) == 2 && slices.Contains([]string{"b", "o", "x"}, Option[1:2]){
 			InputBase = GetInt(Option[1:2])
-		} else if GotInputBase && InputBase == 0{
-			println("Error: Input base can't be 0")
-			os.Exit(1)
-		} else if GotOutputBase && OutputBase ==0{
-			println("Error: Output base can't be 0")
-			os.Exit(1)
+			GotInputBase = true
 		} else if Option == "-h" || Option == "--help"{
 			Help()
 		} else if Option == "-v" || Option == "--version"{
@@ -133,8 +126,13 @@ func Parser(Options []string)(uint64, uint64){
 			GotOutputBase = true
 		}
 	}
-	fmt.Println("In:", InputBase)
-	fmt.Println("Out:", OutputBase)
+	if GotInputBase && InputBase <= 1{
+		println("Error: Input base can't be 1 or less")
+		os.Exit(1)
+	} else if GotOutputBase && OutputBase <= 1{
+		println("Error: Output base can't be 1 or less")
+		os.Exit(1)
+	}
 	return InputBase, OutputBase
 }
 
@@ -148,7 +146,6 @@ func ConvertNumbers(Numbers []string, InputBase uint64) []uint64 {
 	if InputBase == 0{
 		for i:=0; i<len(Numbers); i++{
 			NumberStr := Numbers[i]
-			fmt.Println("num str:", NumberStr)
 			if len(NumberStr) >= 2{
 				if NumberStr[0:2] == "0b"{
 					InputBase = 2
@@ -164,23 +161,17 @@ func ConvertNumbers(Numbers []string, InputBase uint64) []uint64 {
 			if err != nil{
 				ErrorOperationNotPossible(NumberStr)
 			}
-			fmt.Println("num int:", NumberInt)
 			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
 	} else {
 		for i:=0; i<len(Numbers); i++{
 			NumberStr := Numbers[i]
-			fmt.Println("num str:", NumberStr)
 			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
 			if err != nil{
 				ErrorOperationNotPossible(NumberStr)
 			}
-			fmt.Println("num int:", NumberInt)
 			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
-	}
-	for i:=0; i<len(ConvertedNumbers); i++{
-		fmt.Println(ConvertedNumbers[i])
 	}
 	return ConvertedNumbers
 }
