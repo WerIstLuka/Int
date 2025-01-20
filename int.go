@@ -13,7 +13,7 @@ import (
 var Version string = "2.0-dev"
 
 func Help(){
-	println(`Convert any base to any other
+	fmt.Println(`Convert any base to any other
 Usage:
 	int [Options] [Integers]
 Options:
@@ -54,6 +54,9 @@ func GetArguments() ([]string, []string){
 			Numbers = append(Numbers, os.Args[i])
 		}
 	}
+	if len(Options) == 0 && len(Numbers) == 0{
+		Help()
+	}
 	return Options, Numbers
 }
 
@@ -79,7 +82,7 @@ func GetBase(Option string)uint64{
 		Base = GetInt(Option)
 	}
 	if Base == 0{
-		println("Error: invalid base:", Option)
+		fmt.Println("Error: invalid base:", Option)
 		os.Exit(1)
 	}
 	return Base
@@ -94,14 +97,14 @@ func Parser(Options []string)(uint64, uint64){
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
-			println("Error: invalid option:", Option)
+			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
 		}
 		if GotInputBase && slices.Contains([]string{"-B", "-b", "-o", "-x"}, Option[0:2]){
-			println("Error: Input base was given twice")
+			fmt.Println("Error: Input base was given twice")
 			os.Exit(1)
 		} else if GotOutputBase && Option[1:2] == "O"{
-			println("Error: Output base was given twice")
+			fmt.Println("Error: Output base was given twice")
 			os.Exit(1)
 		} else if len(Option) == 2 && slices.Contains([]string{"b", "o", "x"}, Option[1:2]){
 			InputBase = GetInt(Option[1:2])
@@ -109,14 +112,13 @@ func Parser(Options []string)(uint64, uint64){
 		} else if Option == "-h" || Option == "--help"{
 			Help()
 		} else if Option == "-v" || Option == "--version"{
-			println(Version)
+			fmt.Println(Version)
 			os.Exit(0)
 		} else if slices.Contains([]string{"B", "O"}, Option[1:2]) == false{
-			println("Error: invalid option:", Option)
+			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
 		} else if len(Option) < 3{
-			println("Error: too few arguments:", Option)
-			println(Option[1:2])
+			fmt.Println("Error: too few arguments:", Option)
 			os.Exit(1)
 		} else if Option[1:2] == "B"{
 			InputBase = GetBase(Option[2:len(Option)])
@@ -127,17 +129,17 @@ func Parser(Options []string)(uint64, uint64){
 		}
 	}
 	if GotInputBase && InputBase <= 1{
-		println("Error: Input base can't be 1 or less")
+		fmt.Println("Error: Input base can't be 1 or less")
 		os.Exit(1)
 	} else if GotOutputBase && OutputBase <= 1{
-		println("Error: Output base can't be 1 or less")
+		fmt.Println("Error: Output base can't be 1 or less")
 		os.Exit(1)
 	}
 	return InputBase, OutputBase
 }
 
 func ErrorOperationNotPossible(Operation string){
-	println("Error: Operation not possible:", Operation)
+	fmt.Println("Error: Operation not possible:", Operation)
 	os.Exit(1)
 }
 
