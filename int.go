@@ -37,8 +37,8 @@ func GetArguments() ([]string, []string){
 	//read input from pipe if it exists
 	if HasPipeInput(){
  		bytes, _ := io.ReadAll(os.Stdin)
-		pipe := strings.Split((string(bytes)), " ")
-		for i:=0; i<len(pipe); i++{
+		pipe := strings.Split((string(bytes)), "\n")
+		for i:=0; i<len(pipe)-1; i++{
 			if pipe[i][0:1] == "-"{
 				Options = append(Options, strings.TrimSpace(pipe[i]))
 			}else{
