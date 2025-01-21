@@ -49,7 +49,7 @@ if [ "$testarch" == "" ]; then
 	echo "skipping tests"
 else	
 	echo "----------testing----------"
-	if [ $(./linux-${testarch} -v) == "${pkgversion}" ];  then
+	if [ $(./linux-${testarch} -v) == "${pkgversion}" ]; then
 		echo "passed"
 	else
 		echo "input: -v"
@@ -57,7 +57,7 @@ else
 		echo "actual output: $(./linux-${testarch} -v)"
 	fi
 
-	if [ $(./linux-${testarch} 0b101) == "5" ];  then
+	if [ $(./linux-${testarch} 0b101) == "5" ]; then
 		echo "passed"
 	else
 		echo "input: 0b101"
@@ -65,7 +65,7 @@ else
 		echo "actual output: $(./linux-${testarch} 0b101)"
 	fi
 
-	if [ $(./linux-${testarch} 0x20) == "32" ];  then
+	if [ $(./linux-${testarch} 0x20) == "32" ]; then
 		echo "passed"
 	else
 		echo "input: 0x20"
@@ -73,56 +73,56 @@ else
 		echo "actual output: $(./linux-${testarch} 0x20)"
 	fi
 
-	if [ $(./linux-${testarch} a -x) == "10" ];  then
+	if [ $(./linux-${testarch} a -x) == "10" ]; then
 		echo "passed"
 	else
 		echo "input: a -x"
 		echo "expected output: 10"
 		echo "actual output: $(./linux-${testarch} a -x)"
 	fi
-	if [ "$(./linux-${testarch} 2 -b)" == "Error: Operation not possible: 2" ];  then
+	if [ "$(./linux-${testarch} 2 -b)" == "Error: Operation not possible: 2" ]; then
 		echo "passed"
 	else
 		echo "input: 2 -b"
 		echo "expected output: Error: Operation not possible: 2"
 		echo "actual output: $(./linux-${testarch} 2 -b)"
 	fi
-	if [ $(./linux-${testarch} 10 -B7) == "7" ];  then
+	if [ $(./linux-${testarch} 10 -B7) == "7" ]; then
 		echo "passed"
 	else
 		echo "input: 10 -B7"
 		echo "expected output: 7"
 		echo "actual output: $(./linux-${testarch} 10 -B7)"
 	fi
-	if [ $(./linux-${testarch} 10 -Ob) == "1010" ];  then
+	if [ $(./linux-${testarch} 10 -Ob) == "1010" ]; then
 		echo "passed"
 	else
 		echo "input: 10 -Ob"
 		echo "expected output: 1010"
 		echo "actual output: $(./linux-${testarch} 10 -Ob)"
 	fi
-	if [ "$(echo 0b101 | ./linux-${testarch})" == "5" ];  then
+	if [ "$(echo 0b101 | ./linux-${testarch})" == "5" ]; then
 		echo "passed"
 	else
 		echo "input: from pipe: 0b101"
 		echo "expected output: 5"
 		echo "actual output: $(echo 0b101 | ./linux-${testarch})"
 	fi
-	if [ "$(echo -x 10 | ./linux-${testarch})" == "16" ];  then
+	if [ "$(echo -x 10 | ./linux-${testarch})" == "16" ]; then
 		echo "passed"
 	else
 		echo "input: from pipe: -x 10"
 		echo "expected output: 16"
 		echo "actual output: $(echo -x 10 | ./linux-${testarch})"
 	fi
-	if [ "$(echo -x -Ob | ./linux-${testarch} 20)" == "100000" ];  then
+	if [ "$(echo -x -Ob | ./linux-${testarch} 20)" == "100000" ]; then
 		echo "passed"
 	else
 		echo "input: -x -Ob | 20"
 		echo "expected output: 100000"
 		echo "actual output: $(echo -x -Ob | ./linux-${testarch} 20)"
 	fi
-	if [ $(./linux-${testarch} -O7 10) == "13" ];  then
+	if [ $(./linux-${testarch} -O7 10) == "13" ]; then
 		echo "passed"
 	else
 		echo "input: -O7 10"
