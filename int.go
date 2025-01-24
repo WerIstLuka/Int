@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-var Version string = "2.0-dev"
+var Version string = "2.0-dev-2"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -37,12 +37,15 @@ func GetArguments() ([]string, []string){
 	//read input from pipe if it exists
 	if HasPipeInput(){
  		bytes, _ := io.ReadAll(os.Stdin)
-		pipe := strings.Split((string(bytes)), "\n")
-		for i:=0; i<len(pipe)-1; i++{
-			if pipe[i][0:1] == "-"{
-				Options = append(Options, strings.TrimSpace(pipe[i]))
-			}else{
-				Numbers = append(Numbers, strings.TrimSpace(pipe[i]))
+		lines := strings.Split((string(bytes)), "\n")
+		for i:=0; i<len(lines)-1; i++{
+			line := strings.Split(lines[i], " ")
+			for j:=0; j<len(line); j++{
+				if line[j][0:1] == "-"{
+					Options = append(Options, strings.TrimSpace(line[j]))
+				}else{
+					Numbers = append(Numbers, strings.TrimSpace(line[j]))
+				}
 			}
 		}
 	}
