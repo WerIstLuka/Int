@@ -166,5 +166,5 @@ chmod +x "int_${pkgversion}_${arch}/usr/bin/int"
 dpkg-deb --build "int_${pkgversion}_${arch}"
 rm -rf "int_${pkgversion}_${arch}"
 
-unset arch
+unset arch testarch pkgversion
 popd >> /dev/null
