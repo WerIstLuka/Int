@@ -8,9 +8,10 @@ import (
 	"slices"
 	"regexp"
 	"strconv"
+	"math/big"
 )
 
-var Version string = "2.0-dev-2"
+var Version string = "2.0-rc1"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -63,7 +64,7 @@ func GetArguments() ([]string, []string){
 	return Options, Numbers
 }
 
-func GetInt(char string)uint64{
+func GetInt(char string)int64{
 	switch char{
 		case "b":
 			return 2
@@ -76,11 +77,11 @@ func GetInt(char string)uint64{
 	}
 }
 
-func GetBase(Option string)uint64{
-	var Base uint64
+func GetBase(Option string)int64{
+	var Base int64
 	digitCheck := regexp.MustCompile(`^[0-9]+$`)
 	if digitCheck.MatchString(Option){
-		Base, _ = strconv.ParseUint(Option, 10, 64)
+		Base, _ = strconv.ParseInt(Option, 10, 64)
 	} else {
 		Base = GetInt(Option)
 	}
@@ -92,11 +93,11 @@ func GetBase(Option string)uint64{
 }
 
 
-func Parser(Options []string)(uint64, uint64){
+func Parser(Options []string)(int, int64){
 	var GotInputBase bool = false
 	var GotOutputBase bool = false
-	var InputBase uint64 = 0
-	var OutputBase uint64 = 0
+	var InputBase int64 = 0
+	var OutputBase int64 = 0
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
@@ -138,7 +139,7 @@ func Parser(Options []string)(uint64, uint64){
 		fmt.Println("Error: Output base can't be 1 or less")
 		os.Exit(1)
 	}
-	return InputBase, OutputBase
+	return int(InputBase), OutputBase
 }
 
 func ErrorOperationNotPossible(Operation string){
@@ -146,50 +147,45 @@ func ErrorOperationNotPossible(Operation string){
 	os.Exit(1)
 }
 
-func ConvertNumbers(Numbers []string, InputBase uint64) []uint64 {
-	ConvertedNumbers := []uint64{}
+func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 	if InputBase == 0{
-		for i:=0; i<len(Numbers); i++{
-			NumberStr := Numbers[i]
-			if len(NumberStr) >= 2{
-				if NumberStr[0:2] == "0b"{
-					InputBase = 2
-					NumberStr = NumberStr[2:len(NumberStr)]
-				} else if NumberStr[0:2] == "0x"{
-					InputBase = 16
-					NumberStr = NumberStr[2:len(NumberStr)]
-				}
-			} else {
-				InputBase = 10
+		if len(Num) >= 2{
+			if Num[0:2] == "0b"{
+				InputBase = 2
+				Num = Num[2:len(Num)]
+			} else if Num[0:2] == "0x"{
+				InputBase = 16
+				Num = Num[2:len(Num)]
 			}
-			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
-			if err != nil{
-				ErrorOperationNotPossible(NumberStr)
-			}
-			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
-		}
-	} else {
-		for i:=0; i<len(Numbers); i++{
-			NumberStr := Numbers[i]
-			NumberInt, err := strconv.ParseUint(NumberStr, int(InputBase), 64)
-			if err != nil{
-				ErrorOperationNotPossible(NumberStr)
-			}
-			ConvertedNumbers = append(ConvertedNumbers, NumberInt)
 		}
 	}
-	return ConvertedNumbers
-}
-
-func OutputNumbers(Numbers []uint64, OutputBase int){
+	if InputBase == 0{
+		InputBase = 10
+	}
 	if OutputBase == 0{
 		OutputBase = 10
 	}
-	for i:=0; i<len(Numbers); i++{
-		fmt.Println(strconv.FormatInt(int64(Numbers[i]), OutputBase))
+	var Digits string = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	DigitList := strings.Split(Digits, "")
+	for i:=0;i<len(Num);i++{
+		if slices.Index(DigitList, string(Num[i])) >= InputBase{
+			fmt.Println("Error: Number", Num, "is not valid for base", InputBase)
+			os.Exit(1)
+		}
 	}
+	BigNum := new(big.Int)
+	BigNum.SetString(Num, InputBase)
+	
+	BigOutputBase := big.NewInt(OutputBase)
+	var Output = []string{}
+	Index := new(big.Int)
+	for BigNum.Cmp(big.NewInt(0)) != 0 {
+		Output = append(Output, string(Digits[Index.Mod(BigNum, BigOutputBase).Int64()]))
+		BigNum.Div(BigNum, BigOutputBase)
+	}
+	slices.Reverse(Output)
+	return strings.Join(Output, "")
 }
-
 
 func main() {
 	Options, Numbers := GetArguments()
@@ -198,6 +194,11 @@ func main() {
 		fmt.Println("no input")
 		os.Exit(0)
 	}
-	ConvertedNumbers := ConvertNumbers(Numbers, InputBase)
-	OutputNumbers(ConvertedNumbers, int(OutputBase))
+	ConvertedNumbers := []string{}
+	for i:=0;i<len(Numbers);i++{
+		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase))
+	}
+	for i:=0;i<len(ConvertedNumbers);i++{
+		fmt.Println(ConvertedNumbers[i])
+	}
 }
