@@ -106,7 +106,7 @@ make_debian_package () {
 	chmod -w "int_${pkgversion}_$1/usr/bin/int"
 	chmod +x "int_${pkgversion}_$1/usr/bin/int"
 	dpkg-deb --build "int_${pkgversion}_$1"
-	# rm -rf "int_${pkgversion}_$1"
+	rm -rf "int_${pkgversion}_$1"
 }
 
 make_debian_package amd64
