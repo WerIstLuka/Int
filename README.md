@@ -20,6 +20,8 @@ clone the repo ```git clone https://github.com/WerIstLuka/int```
 
 change directory to int ```cd int```
 
-use the mkdpkg script to build ```bash mkdpkg```
+use the build script to build ```bash build.sh```
+
+if you only want to test and skip building for other architectures and the debian packages use the flag `-dev`
 
 the binaries and debian packages will be in the build directory
