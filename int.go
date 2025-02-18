@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0-rc1"
+var Version string = "2.0-rc2"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -85,7 +85,7 @@ func GetBase(Option string)int64{
 	} else {
 		Base = GetInt(Option)
 	}
-	if Base == 0{
+	if Base == 0 || Base > 62{
 		fmt.Println("Error: invalid base:", Option)
 		os.Exit(1)
 	}
