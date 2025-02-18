@@ -50,6 +50,7 @@ test_int "2 -b" "Error: Number 2 is not valid for base 2"
 test_int "10 -B7" 7
 test_int "10 -Ob" 1010
 test_int "-O7 10" 13
+test_int "-B63 10" "Error: invalid base: 63"
 test_int_pipe 0b101 ""  5
 test_int_pipe "-x 10" "" 16
 test_int_pipe "-x -Ob" "20" 100000
