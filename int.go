@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0-rc3"
+var Version string = "2.0-rc4"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -93,11 +93,12 @@ func GetBase(Option string)int64{
 }
 
 
-func Parser(Options []string)(int, int64){
+func Parser(Options []string)(int, int64, bool){
 	var GotInputBase bool = false
 	var GotOutputBase bool = false
 	var InputBase int64 = 0
 	var OutputBase int64 = 0
+	var ForceLong bool = false
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
@@ -118,6 +119,8 @@ func Parser(Options []string)(int, int64){
 		} else if Option == "-v" || Option == "--version"{
 			fmt.Println(Version)
 			os.Exit(0)
+		} else if Option == "-l" || Option == "--long"{
+			ForceLong = true
 		} else if slices.Contains([]string{"B", "O"}, Option[1:2]) == false{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
@@ -139,7 +142,7 @@ func Parser(Options []string)(int, int64){
 		fmt.Println("Error: Output base can't be 1 or less")
 		os.Exit(1)
 	}
-	return int(InputBase), OutputBase
+	return int(InputBase), OutputBase, ForceLong
 }
 
 func ErrorOperationNotPossible(Operation string){
@@ -147,7 +150,7 @@ func ErrorOperationNotPossible(Operation string){
 	os.Exit(1)
 }
 
-func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
+func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool) string{
 	if InputBase == 0{
 		if len(Num) >= 2{
 			if Num[0:2] == "0b"{
@@ -177,10 +180,10 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 	} else {
 		DigitList = strings.Split(DigitsLong, "")
 	}
-	
+	var Index int
 	for i:=0;i<len(Num);i++{
-		var Index int = slices.Index(DigitList, string(Num[i]))
-		if Index == -1{
+		Index = slices.Index(DigitList, string(Num[i]))
+		if Index == -1 || ForceLong{
 			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
 		}
 		if Index >= InputBase{
@@ -189,7 +192,7 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 		}
 	}
 	var OutputDigits *string
-	if OutputBase <= 35{
+	if OutputBase <= 35 && !ForceLong{
 		OutputDigits = &DigitsShort
 	} else {
 		OutputDigits = &DigitsLong
@@ -201,9 +204,9 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 	
 	BigOutputBase := big.NewInt(OutputBase)
 	var Output = []string{}
-	Index := new(big.Int)
+	IndexBig := new(big.Int)
 	for BigNum.Cmp(big.NewInt(0)) != 0 {
-		Output = append(Output, string(string(*OutputDigits)[Index.Mod(BigNum, BigOutputBase).Int64()]))
+		Output = append(Output, string(string(*OutputDigits)[IndexBig.Mod(BigNum, BigOutputBase).Int64()]))
 		BigNum.Div(BigNum, BigOutputBase)
 	}
 	slices.Reverse(Output)
@@ -212,14 +215,14 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 
 func main() {
 	Options, Numbers := GetArguments()
-	InputBase, OutputBase := Parser(Options)
+	InputBase, OutputBase, ForceLong := Parser(Options)
 	if len(Numbers) == 0{
 		fmt.Println("no input")
 		os.Exit(0)
 	}
 	ConvertedNumbers := []string{}
 	for i:=0;i<len(Numbers);i++{
-		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase))
+		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase, ForceLong))
 	}
 	for i:=0;i<len(ConvertedNumbers);i++{
 		fmt.Println(ConvertedNumbers[i])
