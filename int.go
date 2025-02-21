@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0-rc2"
+var Version string = "2.0-rc3"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -165,14 +165,37 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 	if OutputBase == 0{
 		OutputBase = 10
 	}
-	var Digits string = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	DigitList := strings.Split(Digits, "")
+
+
+
+	var DigitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var DigitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var DigitList []string
+	
+	if InputBase <= 35{
+		DigitList = strings.Split(DigitsShort, "")
+	} else {
+		DigitList = strings.Split(DigitsLong, "")
+	}
+	
 	for i:=0;i<len(Num);i++{
-		if slices.Index(DigitList, string(Num[i])) >= InputBase{
+		var Index int = slices.Index(DigitList, string(Num[i]))
+		if Index == -1{
+			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
+		}
+		if Index >= InputBase{
 			fmt.Println("Error: Number", Num, "is not valid for base", InputBase)
 			os.Exit(1)
 		}
 	}
+	var OutputDigits *string
+	if OutputBase <= 35{
+		OutputDigits = &DigitsShort
+	} else {
+		OutputDigits = &DigitsLong
+	}
+
+	
 	BigNum := new(big.Int)
 	BigNum.SetString(Num, InputBase)
 	
@@ -180,7 +203,7 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64) string{
 	var Output = []string{}
 	Index := new(big.Int)
 	for BigNum.Cmp(big.NewInt(0)) != 0 {
-		Output = append(Output, string(Digits[Index.Mod(BigNum, BigOutputBase).Int64()]))
+		Output = append(Output, string(string(*OutputDigits)[Index.Mod(BigNum, BigOutputBase).Int64()]))
 		BigNum.Div(BigNum, BigOutputBase)
 	}
 	slices.Reverse(Output)
