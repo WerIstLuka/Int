@@ -53,6 +53,8 @@ test_int "-O7 10" 13
 test_int "-B63 10" "Error: invalid base: 63"
 test_int "-x A" 10
 test_int "a" "Error: Number a is not valid for base 10"
+test_int "0xA -l" "Error: Number A is not valid for base 16"
+test_int "12 -Ox --long" "c"
 test_int_pipe 0b101 ""  5
 test_int_pipe "-x 10" "" 16
 test_int_pipe "-x -Ob" "20" 100000
