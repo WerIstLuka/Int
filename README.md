@@ -3,7 +3,7 @@ this is currently work in progress
 
 the python branch will be discontinued after the go version has feature parity
 
-version: 2.0-rc2
+version: 2.0-rc3
 
 https://github.com/user-attachments/assets/219743bf-ece8-4439-bd79-cb15a3b970cc
 
