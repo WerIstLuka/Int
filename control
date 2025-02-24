@@ -1,9 +1,10 @@
 Package: int
-Version: 1.0
-Architecture: all
+Version: pkgver
+Architecture: pkgarch
 Section: utils
 Essential: no
 Priority: optional
-Depends: python3 (>=3.10), python3-numpy
+Depends: 
+Installed-Size: pkgsize
 Maintainer: WerIstLuka
 Description: Convert numbers from any base to any other base
