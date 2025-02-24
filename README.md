@@ -1,9 +1,13 @@
-# IMPORANT
-this is currently work in progress
-
-the python branch will be discontinued after the go version has feature parity
-
 version: 2.0-rc4
+
+# info
+I decided to rewrite this program in go
+
+There is a go branch but it's not finished
+
+the python version will be discontinued when the go version has feature parity
+
+go will be released as version 2.0
 
 https://github.com/user-attachments/assets/219743bf-ece8-4439-bd79-cb15a3b970cc
 
