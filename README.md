@@ -1,3 +1,5 @@
+version: 2.0-rc4
+
 # info
 I decided to rewrite this program in go
 
@@ -9,21 +11,21 @@ go will be released as version 2.0
 
 https://github.com/user-attachments/assets/219743bf-ece8-4439-bd79-cb15a3b970cc
 
-version: 1.5.4
 # installation
 ## debian or debian based
 download the .deb file
-## other linux distros
-copy int.py to any directory in your path
+## other linux distros, bsd, windows or mac
+download the precompiled binaries
 
-I recommend ~/.local/bin because it's usually not touched by package managers
-
-## building the debian package
+## building
 install git to download the repo ```sudo apt update && sudo apt install git```
 
 clone the repo ```git clone https://github.com/WerIstLuka/int```
 
 change directory to int ```cd int```
 
-use the mkdpkg script to build ```bash mkdpkg```
+use the build script to build ```bash build.sh```
 
+if you only want to test and skip building for other architectures and the debian packages use the flag `-dev`
+
+the binaries and debian packages will be in the build directory
