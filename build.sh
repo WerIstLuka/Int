@@ -103,10 +103,12 @@ echo "building debian packages"
 pushd build >> /dev/null
 
 make_debian_package () {
+	installsize=$(du -ks "linux-$1"|cut -f 1)
 	mkdir -p int_${pkgversion}_$1/{DEBIAN,usr/bin}
 	cp ../control "int_${pkgversion}_$1/DEBIAN"
 	sed -i -e "s/pkgver/${pkgversion}/g" "int_${pkgversion}_$1/DEBIAN/control"
 	sed -i -e "s/pkgarch/$1/g" "int_${pkgversion}_$1/DEBIAN/control"
+	sed -i -e "s/pkgsize/$installsize/g" "int_${pkgversion}_$1/DEBIAN/control"
 	cp linux-$1 "int_${pkgversion}_$1/usr/bin/int"
 	chmod -w "int_${pkgversion}_$1/usr/bin/int"
 	chmod +x "int_${pkgversion}_$1/usr/bin/int"
