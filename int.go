@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0-rc4"
+var Version string = "2.0"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -23,6 +23,7 @@ Options:
 	-o	add octal prefix to all integers
 	-Bx	where x is the base of the integers
 	-Ox	set the output to any base, also works with b, x and o
+ 	-l	use the same characters for bases below and above 36
 	-h	show this Help text`)
 	os.Exit(0)
 }
