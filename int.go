@@ -6,12 +6,11 @@ import (
 	"io"
 	"strings"
 	"slices"
-	"regexp"
 	"strconv"
 	"math/big"
 )
 
-var Version string = "2.0"
+var Version string = "2.0.1"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -80,8 +79,13 @@ func GetInt(char string)int64{
 
 func GetBase(Option string)int64{
 	var Base int64
-	digitCheck := regexp.MustCompile(`^[0-9]+$`)
-	if digitCheck.MatchString(Option){
+	var IsValid bool = true
+	for i:=0;i<len(Option);i++{
+		if !strings.Contains("0123456789", string(Option[i])){
+			IsValid = false
+		}
+	}
+	if IsValid{
 		Base, _ = strconv.ParseInt(Option, 10, 64)
 	} else {
 		Base = GetInt(Option)
@@ -186,6 +190,10 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		Index = slices.Index(DigitList, string(Num[i]))
 		if Index == -1 || ForceLong{
 			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
+			if Index == -1{
+				fmt.Println("Error: Illegal Character:", string(Num[i]))
+				os.Exit(1)
+			}
 		}
 		if Index >= InputBase{
 			fmt.Println("Error: Number", Num, "is not valid for base", InputBase)
