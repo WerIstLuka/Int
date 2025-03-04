@@ -1,4 +1,4 @@
-version: 2.0
+version: 2.0.1
 
 A fast CLI tool to convert an integer in any base to any other base
 
