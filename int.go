@@ -10,7 +10,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0.1"
+var Version string = "2.1.0"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -35,35 +35,37 @@ func HasPipeInput()bool{
 func GetArguments() ([]string, []string){
 	Options := []string{}
 	Numbers := []string{}
+	Arguments := []string{}
 	//read input from pipe if it exists
 	if HasPipeInput(){
  		bytes, _ := io.ReadAll(os.Stdin)
 		lines := strings.Split((string(bytes)), "\n")
 		for i:=0; i<len(lines)-1; i++{
 			line := strings.Split(lines[i], " ")
-			for j:=0; j<len(line); j++{
-				if line[j][0:1] == "-"{
-					Options = append(Options, strings.TrimSpace(line[j]))
-				}else{
-					Numbers = append(Numbers, strings.TrimSpace(line[j]))
-				}
+			Arguments = slices.Concat(Arguments, line)
+		}
+	}
+	Arguments = slices.Concat(Arguments, os.Args[1:])
+	//get arguments
+	var IsNum bool
+	for i := 0; i < len(Arguments); i++ {
+		IsNum = true
+		for j:=0;j<len(Arguments[i]);j++{
+			if !strings.Contains("0123456789-", string(Arguments[i][j])){
+				IsNum = false
 			}
 		}
-	}
-	//get arguments
-	for i := 1; i < len(os.Args); i++ {
-		if os.Args[i][0:1] == "-"{
-			Options = append(Options, os.Args[i])
+		if !IsNum && string(Arguments[i][0]) == "-"{
+			Options = append(Options, Arguments[i])
 		}else{
-			Numbers = append(Numbers, os.Args[i])
+			Numbers = append(Numbers, Arguments[i])
 		}
 	}
-	if len(Options) == 0 && len(Numbers) == 0{
+	if len(Arguments) == 0{
 		Help()
 	}
 	return Options, Numbers
 }
-
 func GetInt(char string)int64{
 	switch char{
 		case "b":
@@ -150,6 +152,21 @@ func Parser(Options []string)(int, int64, bool){
 	return int(InputBase), OutputBase, ForceLong
 }
 
+func GetNegatives(Numbers []string) ([]string, []int){
+	var NegativesIndex []int
+	var AbsoluteNumbers []string
+	for i:=0;i<len(Numbers);i++{
+		if Numbers[i][0] == '-'{
+			NegativesIndex = append(NegativesIndex, i)
+			AbsoluteNumbers = append(AbsoluteNumbers, Numbers[i][1:])
+		}else{
+			AbsoluteNumbers = append(AbsoluteNumbers, Numbers[i])
+		}
+	}
+	return AbsoluteNumbers, NegativesIndex
+}
+
+
 func ErrorOperationNotPossible(Operation string){
 	fmt.Println("Error: Operation not possible:", Operation)
 	os.Exit(1)
@@ -191,8 +208,10 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		if Index == -1 || ForceLong{
 			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
 			if Index == -1{
-				fmt.Println("Error: Illegal Character:", string(Num[i]))
-				os.Exit(1)
+				if string(Num[i]) != "-"{
+					fmt.Println("Error: Illegal Character:", string(Num[i]))
+					os.Exit(1)
+				}
 			}
 		}
 		if Index >= InputBase{
@@ -214,6 +233,7 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	BigOutputBase := big.NewInt(OutputBase)
 	var Output = []string{}
 	IndexBig := new(big.Int)
+	fmt.Println(BigNum)
 	for BigNum.Cmp(big.NewInt(0)) != 0 {
 		Output = append(Output, string(string(*OutputDigits)[IndexBig.Mod(BigNum, BigOutputBase).Int64()]))
 		BigNum.Div(BigNum, BigOutputBase)
@@ -229,11 +249,16 @@ func main() {
 		fmt.Println("no input")
 		os.Exit(0)
 	}
+	Numbers, NegativesIndex := GetNegatives(Numbers)
 	ConvertedNumbers := []string{}
 	for i:=0;i<len(Numbers);i++{
 		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase, ForceLong))
 	}
 	for i:=0;i<len(ConvertedNumbers);i++{
-		fmt.Println(ConvertedNumbers[i])
+		if slices.Contains(NegativesIndex, i){
+			fmt.Println("-"+ConvertedNumbers[i])
+		}else{
+			fmt.Println(ConvertedNumbers[i])
+		}
 	}
 }
