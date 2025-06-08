@@ -96,7 +96,7 @@ build_release darwin amd64
 build_release darwin arm64
 
 
-command -v go >/dev/null 2>&1 || { echo >&2 "dpkg-deb is not installed, skipping debian packages"; exit 0; }
+command -v dpkg-deb >/dev/null 2>&1 || { echo >&2 "dpkg-deb is not installed, skipping debian packages"; exit 0; }
 
 echo "------------dpkg-----------"
 
