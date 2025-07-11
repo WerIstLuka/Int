@@ -163,6 +163,10 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	if InputBase == 0 && len(Num) >= 2{
 		InputBase = int(GetInt(Num[1]))
 		if InputBase != 0{
+			if len(Num) == 2{
+				fmt.Println("Error: No number given:", Num)
+				os.Exit(1)
+			}
 			Num = Num[2:len(Num)]
 		}
 	}
