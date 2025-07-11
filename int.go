@@ -10,7 +10,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0.1"
+var Version string = "2.0.2"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -42,7 +42,7 @@ func GetArguments() ([]string, []string){
 		for i:=0; i<len(lines)-1; i++{
 			line := strings.Split(lines[i], " ")
 			for j:=0; j<len(line); j++{
-				if line[j][0:1] == "-"{
+				if line[j][0] == '-'{
 					Options = append(Options, strings.TrimSpace(line[j]))
 				}else{
 					Numbers = append(Numbers, strings.TrimSpace(line[j]))
@@ -52,7 +52,7 @@ func GetArguments() ([]string, []string){
 	}
 	//get arguments
 	for i := 1; i < len(os.Args); i++ {
-		if os.Args[i][0:1] == "-"{
+		if os.Args[i][0] == '-'{
 			Options = append(Options, os.Args[i])
 		}else{
 			Numbers = append(Numbers, os.Args[i])
@@ -64,13 +64,13 @@ func GetArguments() ([]string, []string){
 	return Options, Numbers
 }
 
-func GetInt(char string)int64{
+func GetInt(char byte)int64{
 	switch char{
-		case "b":
+		case 'b':
 			return 2
-		case "o":
+		case 'o':
 			return 8
-		case "x":
+		case 'x':
 			return 16
 		default:
 			return 0
@@ -88,7 +88,11 @@ func GetBase(Option string)int64{
 	if IsValid{
 		Base, _ = strconv.ParseInt(Option, 10, 64)
 	} else {
-		Base = GetInt(Option)
+		if len(Option) != 1{
+			Base = 0
+		} else {
+			Base = GetInt(Option[0])
+		}
 	}
 	if Base == 0 || Base > 62{
 		fmt.Println("Error: invalid base:", Option)
@@ -110,14 +114,14 @@ func Parser(Options []string)(int, int64, bool){
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
 		}
-		if GotInputBase && slices.Contains([]string{"-B", "-b", "-o", "-x"}, Option[0:2]){
+		if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
 			fmt.Println("Error: Input base was given twice")
 			os.Exit(1)
-		} else if GotOutputBase && Option[1:2] == "O"{
+		} else if GotOutputBase && Option[1] == 'O'{
 			fmt.Println("Error: Output base was given twice")
 			os.Exit(1)
-		} else if len(Option) == 2 && slices.Contains([]string{"b", "o", "x"}, Option[1:2]){
-			InputBase = GetInt(Option[1:2])
+		} else if len(Option) == 2 && slices.Contains([]byte{'b', 'o', 'x'}, Option[1]){
+			InputBase = GetInt(Option[1])
 			GotInputBase = true
 		} else if Option == "-h" || Option == "--help"{
 			Help()
@@ -132,10 +136,10 @@ func Parser(Options []string)(int, int64, bool){
 		} else if len(Option) < 3{
 			fmt.Println("Error: too few arguments:", Option)
 			os.Exit(1)
-		} else if Option[1:2] == "B"{
+		} else if Option[1] == 'B'{
 			InputBase = GetBase(Option[2:len(Option)])
 			GotInputBase = true
-		} else if Option[1:2] == "O"{
+		} else if Option[1] == 'O'{
 			OutputBase = GetBase(Option[2:len(Option)])
 			GotOutputBase = true
 		}
@@ -156,15 +160,10 @@ func ErrorOperationNotPossible(Operation string){
 }
 
 func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool) string{
-	if InputBase == 0{
-		if len(Num) >= 2{
-			if Num[0:2] == "0b"{
-				InputBase = 2
-				Num = Num[2:len(Num)]
-			} else if Num[0:2] == "0x"{
-				InputBase = 16
-				Num = Num[2:len(Num)]
-			}
+	if InputBase == 0 && len(Num) >= 2{
+		InputBase = int(GetInt(Num[1]))
+		if InputBase != 0{
+			Num = Num[2:len(Num)]
 		}
 	}
 	if InputBase == 0{
