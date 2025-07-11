@@ -1,4 +1,4 @@
-version: 2.0.1
+version: 2.0.2
 
 A fast CLI tool to convert an integer in any base to any other base
 
@@ -17,6 +17,6 @@ change directory to int ```cd int```
 
 use the build script to build ```bash build.sh```
 
-if you only want to test and skip building for other architectures and the debian packages use the flag `-dev`
+you can skip building for other architectures by using `-dev`
 
 the binaries and debian packages will be in the build directory
