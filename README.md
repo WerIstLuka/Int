@@ -1,5 +1,3 @@
-version: 2.0.2
-
 A fast CLI tool to convert an integer in any base to any other base
 
 # installation
