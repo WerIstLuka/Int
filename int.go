@@ -10,7 +10,7 @@ import (
 	"math/big"
 )
 
-var Version string = "2.0.2"
+var Version string = "2.0.3"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
@@ -42,6 +42,9 @@ func GetArguments() ([]string, []string){
 		for i:=0; i<len(lines)-1; i++{
 			line := strings.Split(lines[i], " ")
 			for j:=0; j<len(line); j++{
+				if len(line[j]) == 0{
+					continue
+				}
 				if line[j][0] == '-'{
 					Options = append(Options, strings.TrimSpace(line[j]))
 				}else{
@@ -130,7 +133,7 @@ func Parser(Options []string)(int, int64, bool){
 			os.Exit(0)
 		} else if Option == "-l" || Option == "--long"{
 			ForceLong = true
-		} else if slices.Contains([]string{"B", "O"}, Option[1:2]) == false{
+		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
 		} else if len(Option) < 3{
@@ -217,6 +220,9 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	BigOutputBase := big.NewInt(OutputBase)
 	var Output = []string{}
 	IndexBig := new(big.Int)
+	if BigNum.Cmp(big.NewInt(0)) == 0 {
+		return "0"
+	}
 	for BigNum.Cmp(big.NewInt(0)) != 0 {
 		Output = append(Output, string(string(*OutputDigits)[IndexBig.Mod(BigNum, BigOutputBase).Int64()]))
 		BigNum.Div(BigNum, BigOutputBase)
