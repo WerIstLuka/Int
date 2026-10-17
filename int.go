@@ -23,6 +23,7 @@ Options:
 	-Bx	where x is the base of the integers
 	-Ox	set the output to any base, also works with b, x and o
  	-l	use the same characters for bases below and above 36
+ 	-a  align the outputs to the same length
 	-h	show this Help text`)
 	os.Exit(0)
 }
@@ -105,12 +106,13 @@ func GetBase(Option string)int64{
 }
 
 
-func Parser(Options []string)(int, int64, bool){
+func Parser(Options []string)(int, int64, bool, bool){
 	var GotInputBase bool = false
 	var GotOutputBase bool = false
 	var InputBase int64 = 0
 	var OutputBase int64 = 0
 	var ForceLong bool = false
+	var Align bool = false
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
@@ -133,6 +135,8 @@ func Parser(Options []string)(int, int64, bool){
 			os.Exit(0)
 		} else if Option == "-l" || Option == "--long"{
 			ForceLong = true
+		} else if Option == "-a" || Option == "--align"{
+			Align = true
 		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
@@ -154,7 +158,7 @@ func Parser(Options []string)(int, int64, bool){
 		fmt.Println("Error: Output base can't be 1 or less")
 		os.Exit(1)
 	}
-	return int(InputBase), OutputBase, ForceLong
+	return int(InputBase), OutputBase, ForceLong, Align
 }
 
 func ErrorOperationNotPossible(Operation string){
@@ -231,9 +235,21 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	return strings.Join(Output, "")
 }
 
+func maxLength(source []string) int {
+	var num string
+	var curSize int
+	var maxSize int
+	for i:=0;i<len(source);i++{
+		num = source[i]
+		curSize = len(num)
+		if curSize > maxSize { maxSize = curSize }
+	}
+	return maxSize
+}
+
 func main() {
 	Options, Numbers := GetArguments()
-	InputBase, OutputBase, ForceLong := Parser(Options)
+	InputBase, OutputBase, ForceLong, Align := Parser(Options)
 	if len(Numbers) == 0{
 		fmt.Println("no input")
 		os.Exit(0)
@@ -242,7 +258,22 @@ func main() {
 	for i:=0;i<len(Numbers);i++{
 		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase, ForceLong))
 	}
+	if !Align {
+		for i:=0;i<len(ConvertedNumbers);i++{
+			fmt.Println(ConvertedNumbers[i])
+		}
+		os.Exit(0)
+	}
+	var outLength int = maxLength(ConvertedNumbers)
+	var num string
+	var curSize int
 	for i:=0;i<len(ConvertedNumbers);i++{
-		fmt.Println(ConvertedNumbers[i])
+		num = ConvertedNumbers[i]
+		curSize = len(num)
+		if curSize != outLength {
+			fmt.Print(strings.Repeat("0", outLength-curSize))
+		}
+		fmt.Println(num)
 	}
 }
+
