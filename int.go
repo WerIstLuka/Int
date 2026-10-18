@@ -23,7 +23,7 @@ Options:
 	-Bx	where x is the base of the integers
 	-Ox	set the output to any base, also works with b, x and o
  	-l	use the same characters for bases below and above 36
- 	-a  align the outputs to the same length
+ 	-ax aligns output, X is an integer and align to the next highest multiple
 	-h	show this Help text`)
 	os.Exit(0)
 }
@@ -105,21 +105,45 @@ func GetBase(Option string)int64{
 	return Base
 }
 
+func checkAlign(opt string, align *int) bool {
+	var Alignment int64 = 0
+	var isAligned bool = false
+	if opt[:2] == "-a" {
+		isAligned = true
+		Alignment, _ = strconv.ParseInt(opt[2:], 0, 32)
+	} else if len(opt) >= 7 && opt[:7] == "--align" {
+		isAligned = true
+		Alignment, _ = strconv.ParseInt(opt[7:], 0, 32)
+	}
+	if !isAligned { return false }
+	if *align != 0 {
+		fmt.Println("Error: Align was given twice")
+		os.Exit(1)
+	}
+	if Alignment == 0 {
+		*align = 1
+	} else {
+		*align = int(Alignment)
+	}
+	return true
+}
 
-func Parser(Options []string)(int, int64, bool, bool){
+func Parser(Options []string)(int, int64, bool, int){
 	var GotInputBase bool = false
 	var GotOutputBase bool = false
 	var InputBase int64 = 0
 	var OutputBase int64 = 0
 	var ForceLong bool = false
-	var Align bool = false
+	var Align int = 0
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
 		}
-		if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
+		if checkAlign(Option, &Align) {
+			continue
+		} else if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
 			fmt.Println("Error: Input base was given twice")
 			os.Exit(1)
 		} else if GotOutputBase && Option[1] == 'O'{
@@ -135,8 +159,6 @@ func Parser(Options []string)(int, int64, bool, bool){
 			os.Exit(0)
 		} else if Option == "-l" || Option == "--long"{
 			ForceLong = true
-		} else if Option == "-a" || Option == "--align"{
-			Align = true
 		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
@@ -247,6 +269,17 @@ func maxLength(source []string) int {
 	return maxSize
 }
 
+func nextMultiple(source int, multiple int) int {
+	var result int = multiple
+	for true {
+		if source <= result {
+			break
+		}
+		result += multiple
+	}
+	return result
+}
+
 func main() {
 	Options, Numbers := GetArguments()
 	InputBase, OutputBase, ForceLong, Align := Parser(Options)
@@ -258,13 +291,13 @@ func main() {
 	for i:=0;i<len(Numbers);i++{
 		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase, ForceLong))
 	}
-	if !Align {
+	if Align == 0 {
 		for i:=0;i<len(ConvertedNumbers);i++{
 			fmt.Println(ConvertedNumbers[i])
 		}
 		os.Exit(0)
 	}
-	var outLength int = maxLength(ConvertedNumbers)
+	var outLength int = nextMultiple(maxLength(ConvertedNumbers), Align)
 	var num string
 	var curSize int
 	for i:=0;i<len(ConvertedNumbers);i++{
@@ -276,4 +309,3 @@ func main() {
 		fmt.Println(num)
 	}
 }
-

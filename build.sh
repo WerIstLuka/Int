@@ -56,6 +56,9 @@ test_int "a" "Error: Number a is not valid for base 10"
 test_int "0xA -l" "Error: Number A is not valid for base 16"
 test_int "12 -Ox --long" "c"
 test_int "1.5" "Error: Illegal Character: ."
+test_int "5 50 -a" $'05\n50'
+test_int "5 -Ob -a8" "00000101"
+test_int "0xFF -Ob -a5" "0011111111"
 test_int_pipe 0b101 ""  5
 test_int_pipe "-x 10" "" 16
 test_int_pipe "-x -Ob" "20" 100000
