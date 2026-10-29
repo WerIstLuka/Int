@@ -12,7 +12,7 @@ import (
 	"golang.org/x/term"
 )
 
-var Version string = "2.1.0"
+var Version string = "2.2.0"
 
 func Help(){
 	fmt.Println(`Convert any base to any other
