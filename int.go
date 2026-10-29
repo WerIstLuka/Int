@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"math/big"
+	"github.com/WerIstLuka/llg"
 )
 
 var Version string = "2.1.0"
@@ -216,8 +217,6 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		OutputBase = 10
 	}
 
-
-
 	var DigitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var DigitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var DigitList []string
@@ -266,29 +265,6 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	return strings.Join(Output, "")
 }
 
-func maxLength(source []string) int {
-	var num string
-	var curSize int
-	var maxSize int
-	for i:=0;i<len(source);i++{
-		num = source[i]
-		curSize = len(num)
-		if curSize > maxSize { maxSize = curSize }
-	}
-	return maxSize
-}
-
-func nextMultiple(source int, multiple int) int {
-	var result int = multiple
-	for true {
-		if source <= result {
-			break
-		}
-		result += multiple
-	}
-	return result
-}
-
 func printSplit(num *string, size int, align *int) {
 	var index int = 0
 	var chunk int = *align
@@ -309,8 +285,8 @@ func printSplit(num *string, size int, align *int) {
 }
 
 func printAligned(align *int, output *[]string, split *bool) {
-	var longest = maxLength(*output)
-	var outLength int = nextMultiple(longest, *align)
+	var longest = llg.MaxStringLength(*output)
+	var outLength int = llg.NextMultipleInt(longest, *align)
 	var num string
 	var curSize int
 	for i:=0; i<len(*output); i++ {
