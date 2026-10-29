@@ -101,8 +101,7 @@ func GetBase(Option string)int64{
 		}
 	}
 	if Base == 0 || Base > 62{
-		fmt.Println("Error: invalid base:", Option)
-		os.Exit(1)
+		llg.PrintError("Invalid base:", Option)
 	}
 	return Base
 }
@@ -119,8 +118,7 @@ func checkAlign(opt string, align *int) bool {
 	}
 	if !isAligned { return false }
 	if *align != 0 {
-		fmt.Println("Error: Align was given twice")
-		os.Exit(1)
+		llg.PrintError("Align was given twice")
 	}
 	if Alignment == 0 {
 		*align = 1
@@ -141,17 +139,14 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
-			fmt.Println("Error: invalid option:", Option)
-			os.Exit(1)
+			llg.PrintError("Invalid option:", Option)
 		}
 		if checkAlign(Option, &Align) {
 			continue
 		} else if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
-			fmt.Println("Error: Input base was given twice")
-			os.Exit(1)
+			llg.PrintError("Input base was given twice")
 		} else if GotOutputBase && Option[1] == 'O'{
-			fmt.Println("Error: Output base was given twice")
-			os.Exit(1)
+			llg.PrintError("Output base was given twice")
 		} else if len(Option) == 2 && slices.Contains([]byte{'b', 'o', 'x'}, Option[1]){
 			InputBase = GetInt(Option[1])
 			GotInputBase = true
@@ -165,11 +160,9 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 		} else if Option == "-s" || Option == "--split"{
 			split = true
 		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
-			fmt.Println("Error: invalid option:", Option)
-			os.Exit(1)
+			llg.PrintError("Invalid option:", Option)
 		} else if len(Option) < 3{
-			fmt.Println("Error: too few arguments:", Option)
-			os.Exit(1)
+			llg.PrintError("Too few arguments:", Option)
 		} else if Option[1] == 'B'{
 			InputBase = GetBase(Option[2:len(Option)])
 			GotInputBase = true
@@ -179,24 +172,20 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 		}
 	}
 	if GotInputBase && InputBase <= 1{
-		fmt.Println("Error: Input base can't be 1 or less")
-		os.Exit(1)
+		llg.PrintError("Input base can't be 1 or less")
 	} else if GotOutputBase && OutputBase <= 1{
-		fmt.Println("Error: Output base can't be 1 or less")
-		os.Exit(1)
+		llg.PrintError("Output base can't be 1 or less")
 	}
 	if split {
 		if Align == 0 || Align == 1 {
-			fmt.Println("Error: Split needs align with an integer")
-			os.Exit(1)
+			llg.PrintError("Split needs align with an integer")
 		}
 	}
 	return int(InputBase), OutputBase, ForceLong, Align, split
 }
 
 func ErrorOperationNotPossible(Operation string){
-	fmt.Println("Error: Operation not possible:", Operation)
-	os.Exit(1)
+	llg.PrintError("Operation not possible:", Operation)
 }
 
 func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool) string{
@@ -204,8 +193,7 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		InputBase = int(GetInt(Num[1]))
 		if InputBase != 0{
 			if len(Num) == 2{
-				fmt.Println("Error: No number given:", Num)
-				os.Exit(1)
+				llg.PrintError("No number given:", Num)
 			}
 			Num = Num[2:len(Num)]
 		}
@@ -232,13 +220,11 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		if Index == -1 || ForceLong{
 			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
 			if Index == -1{
-				fmt.Println("Error: Illegal Character:", string(Num[i]))
-				os.Exit(1)
+				llg.PrintError("Illegal character:", string(Num[i]))
 			}
 		}
 		if Index >= InputBase{
-			fmt.Println("Error: Number", Num, "is not valid for base", InputBase)
-			os.Exit(1)
+			llg.PrintError("Number", Num, "is not valid for base", InputBase)
 		}
 	}
 	var OutputDigits *string
@@ -271,9 +257,6 @@ func printSplit(num *string, size int, align *int) {
 	for index < size {
 		if index + chunk >= size {
 			chunk = size - index
-			// fmt.Println("index:", index)
-			// fmt.Println("size: ", size)
-			// fmt.Println("chunk:", chunk)
 		}
 		fmt.Print((*num)[index:index + chunk])
 		index += chunk

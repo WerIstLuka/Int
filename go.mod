@@ -2,4 +2,4 @@ module int
 
 go 1.22.2
 
-require github.com/WerIstLuka/llg v0.0.0-20261018221403-92c56b1a492f // indirect
+require github.com/WerIstLuka/llg v0.0.0-20261029153341-0fe66b2d03f4

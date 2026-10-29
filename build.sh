@@ -19,14 +19,19 @@ fi
 failed_tests=0
 echo "----------testing----------"
 test_int () {
-	if [ "$(./int $1)" == "$2" ]; then
+	OUT=$("./int" $1 2> /dev/null)
+	ERR=$("./int" $1 2>&1 >/dev/null)
+	if [ "$OUT" == "$2" ] && [ "$ERR" == "$3" ]; then
 		echo "passed"
 	else
 		echo "----------failed-----------"
 		echo "input: $1"
 		echo "expected output: $2"
-		echo "actual output: $(./int $1)"
+		echo "actual output:   $OUT"
+		echo "expected error:  $3"
+		echo "actual error:    $ERR"
 		let failed_tests+=1
+		echo "--------end failed---------"
 	fi
 }
 
@@ -42,25 +47,25 @@ test_int_pipe () {
 	fi
 }
 
-test_int -v $pkgversion
-test_int 0b101 5
-test_int 0x20 32
-test_int "a -x" 10
-test_int "2 -b" "Error: Number 2 is not valid for base 2"
-test_int "10 -B7" 7
-test_int "10 -Ob" 1010
-test_int "-O7 10" 13
-test_int "-B63 10" "Error: invalid base: 63"
-test_int "-x A" 10
-test_int "a" "Error: Number a is not valid for base 10"
-test_int "0xA -l" "Error: Number A is not valid for base 16"
-test_int "12 -Ox --long" "c"
-test_int "1.5" "Error: Illegal Character: ."
-test_int "5 50 -a" $'05\n50'
-test_int "5 -Ob -a8" "00000101"
-test_int "0xFF -Ob -a5" "0011111111"
-test_int "0xFF -Ob -a4 -s" "1111 1111"
-test_int "0xFF 0b101 -Ob -a4 -s" $'1111 1111\n0000 0101'
+test_int -v $pkgversion ""
+test_int 0b101 5 ""
+test_int 0x20 32 ""
+test_int "a -x" 10 ""
+test_int "2 -b" "" "[ERROR] Number 2 is not valid for base 2"
+test_int "10 -B7" 7 ""
+test_int "10 -Ob" 1010 ""
+test_int "-O7 10" 13 ""
+test_int "-B63 10" "" "[ERROR] Invalid base: 63"
+test_int "-x A" 10 ""
+test_int "a" "" "[ERROR] Number a is not valid for base 10"
+test_int "0xA -l" "" "[ERROR] Number A is not valid for base 16"
+test_int "12 -Ox --long" "c" ""
+test_int "1.5" "" "[ERROR] Illegal character: ."
+test_int "5 50 -a" $'05\n50' ""
+test_int "5 -Ob -a8" "00000101" ""
+test_int "0xFF -Ob -a5" "0011111111" ""
+test_int "0xFF -Ob -a4 -s" "1111 1111" ""
+test_int "0xFF 0b101 -Ob -a4 -s" $'1111 1111\n0000 0101' ""
 test_int_pipe 0b101 ""  5
 test_int_pipe "-x 10" "" 16
 test_int_pipe "-x -Ob" "20" 100000
