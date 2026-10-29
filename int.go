@@ -38,7 +38,7 @@ func GetArguments() ([]string, []string){
 	if !term.IsTerminal(0) {
  		bytes, _ := io.ReadAll(os.Stdin)
 		lines := strings.Split((string(bytes)), "\n")
-		for i:=0; i<len(lines)-1; i++{
+		for i:=0; i<len(lines); i++{
 			line := strings.Split(lines[i], " ")
 			for j:=0; j<len(line); j++{
 				if len(line[j]) == 0{
