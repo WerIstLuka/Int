@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"math/big"
 	"github.com/WerIstLuka/llg"
+	"golang.org/x/term"
 )
 
 var Version string = "2.1.0"
@@ -30,16 +31,11 @@ Options:
 	os.Exit(0)
 }
 
-func HasPipeInput()bool{
-	FileInfo, _ := os.Stdin.Stat()
-	return FileInfo.Mode() & os.ModeCharDevice == 0
-}
-
 func GetArguments() ([]string, []string){
 	Options := []string{}
 	Numbers := []string{}
 	//read input from pipe if it exists
-	if HasPipeInput(){
+	if !term.IsTerminal(0) {
  		bytes, _ := io.ReadAll(os.Stdin)
 		lines := strings.Split((string(bytes)), "\n")
 		for i:=0; i<len(lines)-1; i++{
