@@ -24,6 +24,7 @@ Options:
 	-Ox	set the output to any base, also works with b, x and o
  	-l	use the same characters for bases below and above 36
  	-ax aligns output, X is an integer and align to the next highest multiple
+ 	-s  split output at multiples of the alignment, requires -ax
 	-h	show this Help text`)
 	os.Exit(0)
 }
@@ -128,13 +129,14 @@ func checkAlign(opt string, align *int) bool {
 	return true
 }
 
-func Parser(Options []string)(int, int64, bool, int){
+func Parser(Options []string)(int, int64, bool, int, bool){
 	var GotInputBase bool = false
 	var GotOutputBase bool = false
 	var InputBase int64 = 0
 	var OutputBase int64 = 0
 	var ForceLong bool = false
 	var Align int = 0
+	var split bool = false
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
@@ -159,6 +161,8 @@ func Parser(Options []string)(int, int64, bool, int){
 			os.Exit(0)
 		} else if Option == "-l" || Option == "--long"{
 			ForceLong = true
+		} else if Option == "-s" || Option == "--split"{
+			split = true
 		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
 			fmt.Println("Error: invalid option:", Option)
 			os.Exit(1)
@@ -180,7 +184,13 @@ func Parser(Options []string)(int, int64, bool, int){
 		fmt.Println("Error: Output base can't be 1 or less")
 		os.Exit(1)
 	}
-	return int(InputBase), OutputBase, ForceLong, Align
+	if split {
+		if Align == 0 || Align == 1 {
+			fmt.Println("Error: Split needs align with an integer")
+			os.Exit(1)
+		}
+	}
+	return int(InputBase), OutputBase, ForceLong, Align, split
 }
 
 func ErrorOperationNotPossible(Operation string){
@@ -211,7 +221,7 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 	var DigitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var DigitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var DigitList []string
-	
+
 	if InputBase <= 35{
 		DigitList = strings.Split(DigitsShort, "")
 	} else {
@@ -239,10 +249,9 @@ func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool)
 		OutputDigits = &DigitsLong
 	}
 
-	
 	BigNum := new(big.Int)
 	BigNum.SetString(Num, InputBase)
-	
+
 	BigOutputBase := big.NewInt(OutputBase)
 	var Output = []string{}
 	IndexBig := new(big.Int)
@@ -280,9 +289,45 @@ func nextMultiple(source int, multiple int) int {
 	return result
 }
 
+func printSplit(num *string, size int, align *int) {
+	var index int = 0
+	var chunk int = *align
+	for index < size {
+		if index + chunk >= size {
+			chunk = size - index
+			// fmt.Println("index:", index)
+			// fmt.Println("size: ", size)
+			// fmt.Println("chunk:", chunk)
+		}
+		fmt.Print((*num)[index:index + chunk])
+		index += chunk
+		if index != size {
+			fmt.Print(" ")
+		}
+	}
+	fmt.Println()
+}
+
+func printAligned(align *int, output *[]string, split *bool) {
+	var longest = maxLength(*output)
+	var outLength int = nextMultiple(longest, *align)
+	var num string
+	var curSize int
+	for i:=0; i<len(*output); i++ {
+		num = (*output)[i]
+		curSize = len(num)
+		num = strings.Repeat("0", outLength-curSize) + num
+		if !*split {
+			fmt.Println(num)
+		} else {
+			printSplit(&num, len(num), align)
+		}
+	}
+}
+
 func main() {
 	Options, Numbers := GetArguments()
-	InputBase, OutputBase, ForceLong, Align := Parser(Options)
+	InputBase, OutputBase, ForceLong, Align, split := Parser(Options)
 	if len(Numbers) == 0{
 		fmt.Println("no input")
 		os.Exit(0)
@@ -297,15 +342,5 @@ func main() {
 		}
 		os.Exit(0)
 	}
-	var outLength int = nextMultiple(maxLength(ConvertedNumbers), Align)
-	var num string
-	var curSize int
-	for i:=0;i<len(ConvertedNumbers);i++{
-		num = ConvertedNumbers[i]
-		curSize = len(num)
-		if curSize != outLength {
-			fmt.Print(strings.Repeat("0", outLength-curSize))
-		}
-		fmt.Println(num)
-	}
+	printAligned(&Align, &ConvertedNumbers, &split)
 }
