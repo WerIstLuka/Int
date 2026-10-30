@@ -12,9 +12,9 @@ import (
 	"golang.org/x/term"
 )
 
-var Version string = "2.2.0"
+var version string = "2.2.0"
 
-func Help(){
+func help(){
 	fmt.Println(`Convert any base to any other
 Usage:
 	int [Options] [Integers]
@@ -31,9 +31,9 @@ Options:
 	os.Exit(0)
 }
 
-func GetArguments() ([]string, []string){
-	Options := []string{}
-	Numbers := []string{}
+func getArguments() ([]string, []string){
+	options := []string{}
+	numbers := []string{}
 	//read input from pipe if it exists
 	if !term.IsTerminal(0) {
  		bytes, _ := io.ReadAll(os.Stdin)
@@ -45,9 +45,9 @@ func GetArguments() ([]string, []string){
 					continue
 				}
 				if line[j][0] == '-'{
-					Options = append(Options, strings.TrimSpace(line[j]))
+					options = append(options, strings.TrimSpace(line[j]))
 				}else{
-					Numbers = append(Numbers, strings.TrimSpace(line[j]))
+					numbers = append(numbers, strings.TrimSpace(line[j]))
 				}
 			}
 		}
@@ -55,18 +55,18 @@ func GetArguments() ([]string, []string){
 	//get arguments
 	for i := 1; i < len(os.Args); i++ {
 		if os.Args[i][0] == '-'{
-			Options = append(Options, os.Args[i])
+			options = append(options, os.Args[i])
 		}else{
-			Numbers = append(Numbers, os.Args[i])
+			numbers = append(numbers, os.Args[i])
 		}
 	}
-	if len(Options) == 0 && len(Numbers) == 0{
-		Help()
+	if len(options) == 0 && len(numbers) == 0{
+		help()
 	}
-	return Options, Numbers
+	return options, numbers
 }
 
-func GetInt(char byte)int64{
+func getInt(char byte)int64{
 	switch char{
 		case 'b':
 			return 2
@@ -79,99 +79,99 @@ func GetInt(char byte)int64{
 	}
 }
 
-func GetBase(Option string)int64{
-	var Base int64
-	var IsValid bool = true
-	for i:=0;i<len(Option);i++{
-		if !strings.Contains("0123456789", string(Option[i])){
-			IsValid = false
+func getBase(option string)int64{
+	var base int64
+	var isValid bool = true
+	for i:=0;i<len(option);i++{
+		if !strings.Contains("0123456789", string(option[i])){
+			isValid = false
 		}
 	}
-	if IsValid{
-		Base, _ = strconv.ParseInt(Option, 10, 64)
+	if isValid{
+		base, _ = strconv.ParseInt(option, 10, 64)
 	} else {
-		if len(Option) != 1{
-			Base = 0
+		if len(option) != 1{
+			base = 0
 		} else {
-			Base = GetInt(Option[0])
+			base = getInt(option[0])
 		}
 	}
-	if Base == 0 || Base > 62{
-		llg.PrintError("Invalid base:", Option)
+	if base == 0 || base > 62{
+		llg.PrintError("Invalid base:", option)
 	}
-	return Base
+	return base
 }
 
 func checkAlign(opt string, align *int, gotInt *bool) bool {
-	var Alignment int64 = 0
+	var alignment int64 = 0
 	var isAligned bool = false
 	if opt[:2] == "-a" {
 		isAligned = true
-		Alignment, _ = strconv.ParseInt(opt[2:], 0, 32)
+		alignment, _ = strconv.ParseInt(opt[2:], 0, 32)
 	} else if len(opt) >= 7 && opt[:7] == "--align" {
 		isAligned = true
-		Alignment, _ = strconv.ParseInt(opt[7:], 0, 32)
+		alignment, _ = strconv.ParseInt(opt[7:], 0, 32)
 	}
 	if !isAligned { return false }
 	if *align != 0 {
 		llg.PrintError("Align was given twice")
 	}
-	if Alignment == 0 {
+	if alignment == 0 {
 		*align = 1
 	} else {
-		*align = int(Alignment)
+		*align = int(alignment)
 		
 	}
 	return true
 }
 
-func Parser(Options []string)(int, int64, bool, int, bool){
-	var GotInputBase bool = false
-	var GotOutputBase bool = false
-	var InputBase int64 = 0
-	var OutputBase int64 = 0
-	var ForceLong bool = false
-	var Align int = 0
+func parser(options []string)(int, int64, bool, int, bool){
+	var gotInputBase bool = false
+	var gotOutputBase bool = false
+	var inputBase int64 = 0
+	var outputBase int64 = 0
+	var forceLong bool = false
+	var align int = 0
 	var split bool = false
 	var splitGotInt bool = false
-	for i:=0; i<len(Options); i++{
-		Option := Options[i]
-		if len(Option) < 2{
-			llg.PrintError("Invalid option:", Option)
+	for i:=0; i<len(options); i++{
+		option := options[i]
+		if len(option) < 2{
+			llg.PrintError("Invalid option:", option)
 		}
-		if checkAlign(Option, &Align, &splitGotInt) {
+		if checkAlign(option, &align, &splitGotInt) {
 			continue
-		} else if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
+		} else if gotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, option[1]){
 			llg.PrintError("Input base was given twice")
-		} else if GotOutputBase && Option[1] == 'O'{
+		} else if gotOutputBase && option[1] == 'O'{
 			llg.PrintError("Output base was given twice")
-		} else if len(Option) == 2 && slices.Contains([]byte{'b', 'o', 'x'}, Option[1]){
-			InputBase = GetInt(Option[1])
-			GotInputBase = true
-		} else if Option == "-h" || Option == "--help"{
-			Help()
-		} else if Option == "-v" || Option == "--version"{
-			fmt.Println(Version)
+		} else if len(option) == 2 && slices.Contains([]byte{'b', 'o', 'x'}, option[1]){
+			inputBase = getInt(option[1])
+			gotInputBase = true
+		} else if option == "-h" || option == "--help"{
+			help()
+		} else if option == "-v" || option == "--version"{
+			fmt.Println(version)
 			os.Exit(0)
-		} else if Option == "-l" || Option == "--long"{
-			ForceLong = true
-		} else if Option == "-s" || Option == "--split"{
+		} else if option == "-l" || option == "--long"{
+			forceLong = true
+		} else if option == "-s" || option == "--split"{
 			split = true
-		} else if slices.Contains([]byte{'B', 'O'}, Option[1]) == false{
-			llg.PrintError("Invalid option:", Option)
-		} else if len(Option) < 3{
-			llg.PrintError("Too few arguments:", Option)
-		} else if Option[1] == 'B'{
-			InputBase = GetBase(Option[2:len(Option)])
-			GotInputBase = true
-		} else if Option[1] == 'O'{
-			OutputBase = GetBase(Option[2:len(Option)])
-			GotOutputBase = true
+		} else if slices.Contains([]byte{'B', 'O'}, option[1]) == false{
+			llg.PrintError("Invalid option:", option)
+		} else if len(option) < 3{
+			llg.PrintError("Too few arguments:", option)
+		} else if option[1] == 'B'{
+			inputBase = getBase(option[2:len(option)])
+			gotInputBase = true
+		} else if option[1] == 'O'{
+			outputBase = getBase(option[2:len(option)])
+			gotOutputBase = true
 		}
 	}
-	if GotInputBase && InputBase <= 1{
+	if gotInputBase && inputBase <= 1{
 		llg.PrintError("Input base can't be 1 or less")
-	} else if GotOutputBase && OutputBase <= 1{
+	} else if gotOutputBase && outputBase <= 1{
 		llg.PrintError("Output base can't be 1 or less")
 	}
 	if split {
@@ -179,74 +179,74 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 			llg.PrintError("Split needs align with an integer")
 		}
 	}
-	return int(InputBase), OutputBase, ForceLong, Align, split
+	return int(inputBase), outputBase, forceLong, align, split
 }
 
-func ErrorOperationNotPossible(Operation string){
-	llg.PrintError("Operation not possible:", Operation)
+func errorOperationNotPossible(operation string){
+	llg.PrintError("Operation not possible:", operation)
 }
 
-func ConvertNumbers(Num string, InputBase int, OutputBase int64, ForceLong bool) string{
-	if InputBase == 0 && len(Num) >= 2{
-		InputBase = int(GetInt(Num[1]))
-		if InputBase != 0{
-			if len(Num) == 2{
-				llg.PrintError("No number given:", Num)
+func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool) string{
+	if inputBase == 0 && len(num) >= 2{
+		inputBase = int(getInt(num[1]))
+		if inputBase != 0{
+			if len(num) == 2{
+				llg.PrintError("No number given:", num)
 			}
-			Num = Num[2:len(Num)]
+			num = num[2:len(num)]
 		}
 	}
-	if InputBase == 0{
-		InputBase = 10
+	if inputBase == 0{
+		inputBase = 10
 	}
-	if OutputBase == 0{
-		OutputBase = 10
+	if outputBase == 0{
+		outputBase = 10
 	}
 
-	var DigitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var DigitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var DigitList []string
+	var digitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var digitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var digitList []string
 
-	if InputBase <= 35{
-		DigitList = strings.Split(DigitsShort, "")
+	if inputBase <= 35{
+		digitList = strings.Split(digitsShort, "")
 	} else {
-		DigitList = strings.Split(DigitsLong, "")
+		digitList = strings.Split(digitsLong, "")
 	}
-	var Index int
-	for i:=0;i<len(Num);i++{
-		Index = slices.Index(DigitList, string(Num[i]))
-		if Index == -1 || ForceLong{
-			Index = slices.Index(strings.Split(DigitsLong, ""), string(Num[i]))
-			if Index == -1{
-				llg.PrintError("Illegal character:", string(Num[i]))
+	var index int
+	for i:=0;i<len(num);i++{
+		index = slices.Index(digitList, string(num[i]))
+		if index == -1 || forceLong{
+			index = slices.Index(strings.Split(digitsLong, ""), string(num[i]))
+			if index == -1{
+				llg.PrintError("Illegal character:", string(num[i]))
 			}
 		}
-		if Index >= InputBase{
-			llg.PrintError("Number", Num, "is not valid for base", InputBase)
+		if index >= inputBase{
+			llg.PrintError("Number", num, "is not valid for base", inputBase)
 		}
 	}
-	var OutputDigits *string
-	if OutputBase <= 35 && !ForceLong{
-		OutputDigits = &DigitsShort
+	var outputDigits *string
+	if outputBase <= 35 && !forceLong{
+		outputDigits = &digitsShort
 	} else {
-		OutputDigits = &DigitsLong
+		outputDigits = &digitsLong
 	}
 
-	BigNum := new(big.Int)
-	BigNum.SetString(Num, InputBase)
+	bigNum := new(big.Int)
+	bigNum.SetString(num, inputBase)
 
-	BigOutputBase := big.NewInt(OutputBase)
-	var Output = []string{}
-	IndexBig := new(big.Int)
-	if BigNum.Cmp(big.NewInt(0)) == 0 {
+	bigOutputBase := big.NewInt(outputBase)
+	var output = []string{}
+	indexBig := new(big.Int)
+	if bigNum.Cmp(big.NewInt(0)) == 0 {
 		return "0"
 	}
-	for BigNum.Cmp(big.NewInt(0)) != 0 {
-		Output = append(Output, string(string(*OutputDigits)[IndexBig.Mod(BigNum, BigOutputBase).Int64()]))
-		BigNum.Div(BigNum, BigOutputBase)
+	for bigNum.Cmp(big.NewInt(0)) != 0 {
+		output = append(output, string(string(*outputDigits)[indexBig.Mod(bigNum, bigOutputBase).Int64()]))
+		bigNum.Div(bigNum, bigOutputBase)
 	}
-	slices.Reverse(Output)
-	return strings.Join(Output, "")
+	slices.Reverse(output)
+	return strings.Join(output, "")
 }
 
 func printSplit(num *string, size int, align *int) {
@@ -283,21 +283,21 @@ func printAligned(align *int, output *[]string, split *bool) {
 }
 
 func main() {
-	Options, Numbers := GetArguments()
-	InputBase, OutputBase, ForceLong, Align, split := Parser(Options)
-	if len(Numbers) == 0{
+	options, numbers := getArguments()
+	inputBase, outputBase, forceLong, align, split := parser(options)
+	if len(numbers) == 0{
 		fmt.Println("no input")
 		os.Exit(0)
 	}
-	ConvertedNumbers := []string{}
-	for i:=0;i<len(Numbers);i++{
-		ConvertedNumbers = append(ConvertedNumbers, ConvertNumbers(Numbers[i], InputBase, OutputBase, ForceLong))
+	convertedNumbers := []string{}
+	for i:=0;i<len(numbers);i++{
+		convertedNumbers = append(convertedNumbers, convertNumbers(numbers[i], inputBase, outputBase, forceLong))
 	}
-	if Align == 0 {
-		for i:=0;i<len(ConvertedNumbers);i++{
-			fmt.Println(ConvertedNumbers[i])
+	if align == 0 {
+		for i:=0;i<len(convertedNumbers);i++{
+			fmt.Println(convertedNumbers[i])
 		}
 		os.Exit(0)
 	}
-	printAligned(&Align, &ConvertedNumbers, &split)
+	printAligned(&align, &convertedNumbers, &split)
 }

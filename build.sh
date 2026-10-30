@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pkgversion=$(cat int.go | grep "^var Version string" | grep -Po '(?<=").+(?=")')
+pkgversion=$(cat int.go | grep "^var version string" | grep -Po '(?<=").+(?=")')
 
 command -v go >/dev/null 2>&1 || { echo >&2 "Go is not installed, exiting"; exit 1; }
 
