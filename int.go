@@ -32,8 +32,8 @@ Options:
 }
 
 func getArguments() ([]string, []string){
-	options := []string{}
-	numbers := []string{}
+	var options []string
+	var numbers []string
 	//read input from pipe if it exists
 	if !term.IsTerminal(0) {
  		bytes, _ := io.ReadAll(os.Stdin)
@@ -104,15 +104,11 @@ func getBase(option string)int64{
 
 func checkAlign(opt string, align *int, gotInt *bool) bool {
 	var alignment int64 = 0
-	var isAligned bool = false
 	if opt[:2] == "-a" {
-		isAligned = true
 		alignment, _ = strconv.ParseInt(opt[2:], 0, 32)
 	} else if len(opt) >= 7 && opt[:7] == "--align" {
-		isAligned = true
 		alignment, _ = strconv.ParseInt(opt[7:], 0, 32)
-	}
-	if !isAligned { return false }
+	} else { return false }
 	if *align != 0 {
 		llg.PrintError("Align was given twice")
 	}
@@ -120,7 +116,6 @@ func checkAlign(opt string, align *int, gotInt *bool) bool {
 		*align = 1
 	} else {
 		*align = int(alignment)
-		
 	}
 	return true
 }
@@ -236,7 +231,7 @@ func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool)
 	bigNum.SetString(num, inputBase)
 
 	bigOutputBase := big.NewInt(outputBase)
-	var output = []string{}
+	var output []string
 	indexBig := new(big.Int)
 	if bigNum.Cmp(big.NewInt(0)) == 0 {
 		return "0"
