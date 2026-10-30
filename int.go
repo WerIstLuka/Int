@@ -19,15 +19,15 @@ func Help(){
 Usage:
 	int [Options] [Integers]
 Options:
-	-b	add binary prefix to all integers
-	-x	add hexadecimal prefix to all integers
-	-o	add octal prefix to all integers
-	-Bx	where x is the base of the integers
-	-Ox	set the output to any base, also works with b, x and o
- 	-l	use the same characters for bases below and above 36
- 	-ax aligns output, X is an integer and align to the next highest multiple
+	-b  add binary prefix to all integers
+	-x  add hexadecimal prefix to all integers
+	-o  add octal prefix to all integers
+	-Bx where x is the base of the integers
+	-Ox set the output to any base, also works with b, x and o
+ 	-l  use the same characters for bases below and above 36
+ 	-ax aligns output, X is an integer and aligns to the next highest multiple
  	-s  split output at multiples of the alignment, requires -ax
-	-h	show this Help text`)
+	-h  show this Help text`)
 	os.Exit(0)
 }
 
@@ -102,7 +102,7 @@ func GetBase(Option string)int64{
 	return Base
 }
 
-func checkAlign(opt string, align *int) bool {
+func checkAlign(opt string, align *int, gotInt *bool) bool {
 	var Alignment int64 = 0
 	var isAligned bool = false
 	if opt[:2] == "-a" {
@@ -120,6 +120,7 @@ func checkAlign(opt string, align *int) bool {
 		*align = 1
 	} else {
 		*align = int(Alignment)
+		
 	}
 	return true
 }
@@ -132,12 +133,13 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 	var ForceLong bool = false
 	var Align int = 0
 	var split bool = false
+	var splitGotInt bool = false
 	for i:=0; i<len(Options); i++{
 		Option := Options[i]
 		if len(Option) < 2{
 			llg.PrintError("Invalid option:", Option)
 		}
-		if checkAlign(Option, &Align) {
+		if checkAlign(Option, &Align, &splitGotInt) {
 			continue
 		} else if GotInputBase && slices.Contains([]byte{'B', 'b', 'o', 'x'}, Option[1]){
 			llg.PrintError("Input base was given twice")
@@ -173,7 +175,7 @@ func Parser(Options []string)(int, int64, bool, int, bool){
 		llg.PrintError("Output base can't be 1 or less")
 	}
 	if split {
-		if Align == 0 || Align == 1 {
+		if splitGotInt {
 			llg.PrintError("Split needs align with an integer")
 		}
 	}
