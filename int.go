@@ -12,7 +12,7 @@ import (
 	"golang.org/x/term"
 )
 
-var version string = "2.2.0"
+var version string = "2.2.1"
 
 func help(){
 	fmt.Println(`Convert any base to any other
@@ -284,7 +284,7 @@ func main() {
 		fmt.Println("no input")
 		os.Exit(0)
 	}
-	convertedNumbers := []string{}
+	var convertedNumbers []string
 	for i:=0;i<len(numbers);i++{
 		convertedNumbers = append(convertedNumbers, convertNumbers(numbers[i], inputBase, outputBase, forceLong))
 	}
