@@ -32,8 +32,8 @@ Options:
 }
 
 func getArguments() ([]string, []string){
-	var options []string
-	var numbers []string
+	var options []string = make([]string, 0, 5)
+	var numbers []string = make([]string, 0, 255)
 	//read input from pipe if it exists
 	if !term.IsTerminal(0) {
  		bytes, _ := io.ReadAll(os.Stdin)
@@ -181,6 +181,23 @@ func errorOperationNotPossible(operation string){
 	llg.PrintError("Operation not possible:", operation)
 }
 
+func searchDigits(longDigits bool, char byte) int {
+	if char >= '0' && char <= '9' {
+		return int(char - '0')
+	}
+	if char >= 'A' && char <= 'Z' {
+		if longDigits {
+			return int(char - 'A' + 36)
+		}
+		return int(char - 'A' + 10)
+	}
+	if !longDigits { return -1 }
+	if char >= 'a' && char <= 'z' {
+		return int(char - 'a' + 10)
+		}
+	return -1
+}
+
 func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool) string{
 	if inputBase == 0 && len(num) >= 2{
 		inputBase = int(getInt(num[1]))
@@ -198,20 +215,18 @@ func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool)
 		outputBase = 10
 	}
 
-	var digitsShort string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var digitsLong string  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var digitList []string
+	var longDigits bool
 
 	if inputBase <= 35{
-		digitList = strings.Split(digitsShort, "")
+		longDigits = false
 	} else {
-		digitList = strings.Split(digitsLong, "")
+		longDigits = true
 	}
 	var index int
 	for i:=0;i<len(num);i++{
-		index = slices.Index(digitList, string(num[i]))
+		index = searchDigits(longDigits, num[i])
 		if index == -1 || forceLong{
-			index = slices.Index(strings.Split(digitsLong, ""), string(num[i]))
+			index = searchDigits(true, num[i])
 			if index == -1{
 				llg.PrintError("Illegal character:", string(num[i]))
 			}
@@ -220,28 +235,15 @@ func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool)
 			llg.PrintError("Number", num, "is not valid for base", inputBase)
 		}
 	}
-	var outputDigits *string
-	if outputBase <= 35 && !forceLong{
-		outputDigits = &digitsShort
-	} else {
-		outputDigits = &digitsLong
-	}
 
 	bigNum := new(big.Int)
 	bigNum.SetString(num, inputBase)
 
-	bigOutputBase := big.NewInt(outputBase)
-	var output []string
-	indexBig := new(big.Int)
-	if bigNum.Cmp(big.NewInt(0)) == 0 {
-		return "0"
+	output := bigNum.Text(int(outputBase))
+	if outputBase <= 36 && !forceLong {
+		return strings.ToUpper(output)
 	}
-	for bigNum.Cmp(big.NewInt(0)) != 0 {
-		output = append(output, string(string(*outputDigits)[indexBig.Mod(bigNum, bigOutputBase).Int64()]))
-		bigNum.Div(bigNum, bigOutputBase)
-	}
-	slices.Reverse(output)
-	return strings.Join(output, "")
+	return output
 }
 
 func printSplit(num *string, size int, align *int) {
@@ -284,7 +286,7 @@ func main() {
 		fmt.Println("no input")
 		os.Exit(0)
 	}
-	var convertedNumbers []string
+	var convertedNumbers []string = make([]string, 0, len(numbers))
 	for i:=0;i<len(numbers);i++{
 		convertedNumbers = append(convertedNumbers, convertNumbers(numbers[i], inputBase, outputBase, forceLong))
 	}
