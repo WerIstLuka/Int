@@ -1,9 +1,15 @@
 #!/bin/bash
 
+# TODO: make a better build system
+#       standalone build system applications
+#       kinda like nob.h but written in bash, python, or go
+#       should come with default functions for 99% of builds
+#       should allow for custom functions for the remaining 1%
+#       better testing
+
 pkgversion=$(cat int.go | grep "^var version string" | grep -Po '(?<=").+(?=")')
 
 command -v go >/dev/null 2>&1 || { echo >&2 "Go is not installed, exiting"; exit 1; }
-
 
 echo "building version" $pkgversion
 
@@ -14,7 +20,6 @@ if [ "$?" != "0" ]; then
 	echo "error building, exiting"
 	exit 1
 fi
-
 
 failed_tests=0
 echo "----------testing----------"
@@ -30,8 +35,11 @@ test_int () {
 		echo "actual output:   $OUT"
 		echo "expected error:  $3"
 		echo "actual error:    $ERR"
-		let failed_tests+=1
+		(( failed_tests ++ ))
 		echo "--------end failed---------"
+		if [ $isDev ] && [ "$ERR" != "$3" ]; then
+			(( failed_tests -- ))
+		fi
 	fi
 }
 
@@ -66,10 +74,10 @@ test_int "5 -Ob -a8" "00000101" ""
 test_int "0xFF -Ob -a5" "0011111111" ""
 test_int "0xFF -Ob -a4 -s" "1111 1111" ""
 test_int "0xFF 0b101 -Ob -a4 -s" $'1111 1111\n0000 0101' ""
+test_int "oxa" "" "[ERROR] Number oxa is not valid for base 10"
 test_int_pipe 0b101 ""  5
 test_int_pipe "-x 10" "" 16
 test_int_pipe "-x -Ob" "20" 100000
-
 
 if [ "$failed_tests" != "0" ]; then
 	echo "$failed_tests tests failed, exiting"
@@ -77,9 +85,8 @@ if [ "$failed_tests" != "0" ]; then
 fi
 
 if [ "$1" == "-dev" ]; then
-	exit 0
+	exit 1
 fi
-
 
 #build releases
 if [ -d "build" ]; then
@@ -104,7 +111,6 @@ build_release windows amd64
 build_release windows arm64
 build_release darwin amd64
 build_release darwin arm64
-
 
 command -v dpkg-deb >/dev/null 2>&1 || { echo >&2 "dpkg-deb is not installed, skipping debian packages"; exit 0; }
 

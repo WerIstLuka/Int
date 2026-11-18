@@ -12,7 +12,7 @@ import (
 	"golang.org/x/term"
 )
 
-var version string = "2.2.1"
+var version string = "2.2.2"
 
 func help(){
 	fmt.Println(`Convert any base to any other
@@ -66,7 +66,9 @@ func getArguments() ([]string, []string) {
 	return options, numbers
 }
 
-func getInt(char byte) int64 {
+func getInt(str string, index uint8) int64 {
+	if index != 0 && str[0] != '0' && str[0] != '-' { return 0 }
+	var char byte = str[index]
 	switch char{
 		case 'b':
 			return 2
@@ -87,13 +89,13 @@ func getBase(option string) int64 {
 			isValid = false
 		}
 	}
-	if isValid{ 
+	if isValid {
 		base, _ = strconv.ParseInt(option, 10, 64)
 	} else {
 		if len(option) != 1 {
 			base = 0
 		} else {
-			base = getInt(option[0])
+			base = getInt(option, 0)
 		}
 	}
 	if base == 0 || base > 62 {
@@ -141,7 +143,7 @@ func parser(options []string) (int, int64, bool, int, bool) {
 		} else if gotOutputBase && option[1] == 'O' {
 			llg.PrintError("Output base was given twice")
 		} else if len(option) == 2 && slices.Contains([]byte{'b', 'o', 'x'}, option[1]) {
-			inputBase = getInt(option[1])
+			inputBase = getInt(option, 1)
 			gotInputBase = true
 		} else if option == "-h" || option == "--help" {
 			help()
@@ -200,7 +202,7 @@ func searchDigits(longDigits bool, char byte) int {
 
 func convertNumbers(num string, inputBase int, outputBase int64, forceLong bool) string {
 	if inputBase == 0 && len(num) >= 2 {
-		inputBase = int(getInt(num[1]))
+		inputBase = int(getInt(num, 1))
 		if inputBase != 0 {
 			if len(num) == 2 {
 				llg.PrintError("No number given:", num)
@@ -280,6 +282,7 @@ func printAligned(align *int, output *[]string, split *bool) {
 }
 
 func main() {
+	llg.GetDebug()
 	options, numbers := getArguments()
 	inputBase, outputBase, forceLong, align, split := parser(options)
 	if len(numbers) == 0 {
